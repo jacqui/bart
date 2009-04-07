@@ -70,10 +70,4 @@ describe Concept do
     concept.fields.map(&:name).to_s.should == "xCough"
   end
 
-  it "should humanize concept" do
-    concept = create_sample(Concept)
-    concept.humanize
-    concept.name.should =~ /Xcough/i
-  end
-
 end

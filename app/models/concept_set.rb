@@ -18,12 +18,12 @@ class ConceptSet < OpenMRS
   end
 
   def name
-    self.set_concept.name
+    set_concept.name
   end
 
   # OPTIMIZE inefficient code (only called once, in admin)
   def self.find_by_name(name)
-    ConceptSet.find(:all).collect{|cs|cs if cs.name == name}.compact
+    ConceptSet.find(:all).select{|cs| cs.name == name}.compact
   end
 
 end
