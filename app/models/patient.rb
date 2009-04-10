@@ -142,29 +142,29 @@ class Patient < OpenMRS
   def self.merge(patient_id, secondary_patient_id)
     patient = Patient.find(patient_id, :include => [:patient_identifiers, :patient_programs, :patient_names])
     secondary_patient = Patient.find(secondary_patient_id, :include => [:patient_identifiers, :patient_programs, :patient_names])
-    ActiveRecord::Base.connection.execute("UPDATE person SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
-      ActiveRecord::Base.connection.execute("UPDATE patient_address SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
-      ActiveRecord::Base.connection.execute("UPDATE encounter SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
-      ActiveRecord::Base.connection.execute("UPDATE obs SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
-      ActiveRecord::Base.connection.execute("UPDATE note SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+    connection.execute("UPDATE person SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      connection.execute("UPDATE patient_address SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      connection.execute("UPDATE encounter SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      connection.execute("UPDATE obs SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      connection.execute("UPDATE note SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
       secondary_patient.patient_identifiers.each {|r|
       next if patient.patient_identifiers.map(&:identifier).include?(r.identifier)
       r.patient_id = patient_id
       r.save!
     }
-    ActiveRecord::Base.connection.execute("DELETE FROM patient_identifier WHERE patient_id = #{secondary_patient_id}")
+    connection.execute("DELETE FROM patient_identifier WHERE patient_id = #{secondary_patient_id}")
       secondary_patient.patient_names.each {|r|
       next if patient.patient_names.map{|pn| "#{pn.given_name} #{pn.family_name}"}.include?("#{r.given_name} #{r.family_name}")
       r.patient_id = patient_id
       r.save!
     }
-    ActiveRecord::Base.connection.execute("DELETE FROM patient_name WHERE patient_id = #{secondary_patient_id}")
+    connection.execute("DELETE FROM patient_name WHERE patient_id = #{secondary_patient_id}")
       secondary_patient.patient_programs.each {|r|
       next if patient.patient_programs.map(&:program_id).include?(r.program_id)
       r.patient_id = patient_id
       r.save!
     }
-    ActiveRecord::Base.connection.execute("DELETE FROM patient_program WHERE patient_id = #{secondary_patient_id}")
+    connection.execute("DELETE FROM patient_program WHERE patient_id = #{secondary_patient_id}")
       Patient.delete(secondary_patient_id)
   end
 
@@ -3056,11 +3056,11 @@ class Patient < OpenMRS
 
       # re-cache patients outcomes
       def reset_outcomes
-        ActiveRecord::Base.connection.execute <<-EOF
+        self.class.connection.execute <<-EOF
         DELETE FROM patient_historical_outcomes WHERE patient_id = #{id};
           EOF
 
-        ActiveRecord::Base.connection.execute <<-EOF
+        self.class.connection.execute <<-EOF
         INSERT INTO patient_historical_outcomes (patient_id, outcome_date, outcome_concept_id)
         SELECT encounter.patient_id, encounter.encounter_datetime, 324
         FROM encounter
@@ -3095,11 +3095,11 @@ class Patient < OpenMRS
       end
 
       def reset_regimens
-        ActiveRecord::Base.connection.execute <<-EOF
+        self.class.connection.execute <<-EOF
         DELETE FROM patient_historical_regimens WHERE patient_id = #{id};
           EOF
 
-        ActiveRecord::Base.connection.execute <<-EOF
+        self.class.connection.execute <<-EOF
         INSERT INTO patient_historical_regimens(regimen_concept_id, patient_id, encounter_id, dispensed_date)
         SELECT patient_regimen_ingredients.regimen_concept_id as regiment_concept_id,
           patient_regimen_ingredients.patient_id as patient_id,
