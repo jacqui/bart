@@ -536,31 +536,28 @@ class Patient < OpenMRS
   end
 
   def age(today = Date.today)
-    return nil if self.birthdate.nil?
-
-    patient_age = (today.year - self.birthdate.year) + ((today.month - self.birthdate.month) + ((today.day - self.birthdate.day) < 0 ? -1 : 0) < 0 ? -1 : 0)
-
-    birth_date=self.birthdate
-    estimate=self.birthdate_estimated
-    if birth_date.month == 7 and birth_date.day == 1 and estimate==true and Time.now.month < birth_date.month and self.date_created.year == Time.now.year
-      return patient_age + 1
-    else
-      return patient_age
-    end
+    return unless birthdate
+    days_per_year = 365.25
+    age = ((today - birthdate.to_date).to_i / days_per_year).floor
+    age_needs_correction?(today) ? age + 1 : age
   end
 
   def age=(age)
-    age = age.to_i
-    patient_estimated_birthyear = Date.today.year - age
-    patient_estimated_birthmonth = 7
-    patient_estimated_birthday = 1
-    self.birthdate = Date.new(patient_estimated_birthyear, patient_estimated_birthmonth, patient_estimated_birthday)
-    self.birthdate_estimated = true
-    self.save
+    estimated_birth_year = Date.today.year - age.to_i
+    update_attributes :birthdate_estimated => true,
+                      :birthdate => Date.new(estimated_birth_year, 7, 1)
   end
 
-  def age_in_months
-    ((Time.now - self.birthdate.to_time)/1.month).floor
+  # Returns true if the patient's age was estimated via Patient#age=, and the
+  # patient was created this year, prior to the estimated birthday
+  def age_needs_correction?(today = Date.today)
+    birthdate_estimated && date_created.year == today.year && today.month < 7 && birthdate.month == 7 && birthdate.day == 1
+  end
+
+  def age_in_months(today = Date.today)
+    return unless birthdate
+    days_per_month = 30.4375
+    ((today - birthdate.to_date).to_i / days_per_month).floor
   end
 
   def child?
@@ -569,21 +566,23 @@ class Patient < OpenMRS
   end
 
   def adult?
-    return !self.child?
+    !child?
   end
 
   def adult_or_child
-    self.child? ? "child" : "adult"
+    child? ? "child" : "adult"
   end
 
   def age_at_initiation
-    initiation_date = self.date_started_art
-    return self.age(initiation_date) unless initiation_date.nil?
+    if time = date_started_art
+      age(time.to_date)
+    end
   end
 
   def child_at_initiation?
-    age_at_initiation = self.age_at_initiation
-    return age_at_initiation <= 14 unless age_at_initiation.nil?
+    if age = age_at_initiation
+      age <= 14
+    end
   end
 
   # The only time this is called is with no params... it is always first line, can we kill the param?
@@ -1221,7 +1220,7 @@ class Patient < OpenMRS
 
   end
 
-  def Patient.validate_appointment_encounter(encounter)
+  def self.validate_appointment_encounter(encounter)
     appointment_dates_available = Observation.find(:all,:conditions =>["voided=0 and concept_id=? and patient_id=? and Date(obs_datetime)=?",Concept.find_by_name("Appointment date").id,encounter.patient_id,encounter.encounter_datetime.to_date])
     appointment_dates_available.each do |obs|
       if obs.encounter_id != encounter.id
@@ -1233,7 +1232,7 @@ class Patient < OpenMRS
     end
   end
 
-  def Patient.date_for_easter(year=Date.today.year)
+  def self.date_for_easter(year=Date.today.year)
     goldenNumber = year % 19 + 1
 
     solarCorrection = (year - 1600) / 100 - (year - 1600) / 400
@@ -1249,11 +1248,11 @@ class Patient < OpenMRS
     return (Time.local(year, "mar", 21) + (easterOffset * 1.day)).to_date
   end
 
-  def Patient.find_by_first_last_sex(first_name, last_name, sex)
+  def self.find_by_first_last_sex(first_name, last_name, sex)
     PatientName.find_all_by_family_name(last_name, :conditions => ["LEFT(given_name,1) = ? AND patient.gender = ? AND patient.voided = false",first_name.first, sex], :joins => "JOIN patient ON patient.patient_id = patient_name.patient_id").collect{|pn|pn.patient}
   end
 
-  def Patient.find_by_name(name)
+  def self.find_by_name(name)
     # setup a hash to collect all of the patients in. Use a hash indexed by patient id to remove duplicates
     patient_hash = Hash.new
     # find all patient name objects that have a given_name or family_name like the value passed in
@@ -1278,23 +1277,23 @@ class Patient < OpenMRS
                                            return patient_hash.values
   end
 
-  def Patient.find_by_birthyear(start_date)
+  def self.find_by_birthyear(start_date)
     year = start_date.to_date.year
     Patient.find(:all,:conditions => ["Year(birthdate) = ?" ,year])
   end
 
-  def Patient.find_by_birthmonth(start_date)
+  def self.find_by_birthmonth(start_date)
     month = start_date.to_date.month
     Patient.find(:all,:conditions => ["Month(birthdate)=?" ,month])
   end
 
-  def Patient.find_by_birthday(start_date)
+  def self.find_by_birthday(start_date)
     day = start_date.to_date.day
     Patient.find(:all,:conditions => ["Day(birthdate) =?" ,day])
   end
 
 
-  def Patient.find_by_residence(residence)
+  def self.find_by_residence(residence)
     PatientAddress.find(:all,:conditions => ["city_village Like ?","%#{residence}%"]).collect do |patient_address|
       patient_address.patient
     end
@@ -1316,14 +1315,14 @@ class Patient < OpenMRS
     end
   end
 
-  def Patient.find_by_national_id(number)
+  def self.find_by_national_id(number)
     national_id_type = PatientIdentifierType.find_by_name("National id").patient_identifier_type_id
     PatientIdentifier.find(:all,:conditions => ["identifier_type =?  and identifier LIKE ?",national_id_type, "%#{number}%"]).collect do |patient_identifier|
       patient_identifier.patient
     end
   end
 
-  def Patient.find_by_arv_number(number)
+  def self.find_by_arv_number(number)
     arv_national_id_type = PatientIdentifierType.find_by_name("ARV national id").patient_identifier_type_id
     PatientIdentifier.find(:all,
                            :conditions => ["identifier_type =?  and identifier=?",arv_national_id_type,number]
@@ -1367,7 +1366,7 @@ class Patient < OpenMRS
     return PatientAddress.find_by_patient_id(self.id, :conditions => "voided = 0").city_village unless  PatientAddress.find_by_patient_id(self.id).nil?
   end
 
-  def Patient.find_by_patient_name(first_name,last_name)
+  def self.find_by_patient_name(first_name,last_name)
     first_name=first_name.strip[0..0]
     patient_hash = Hash.new
     # find all patient name objects that have a given_name or family_name like the value passed in
@@ -1381,7 +1380,7 @@ class Patient < OpenMRS
                      return patient_hash.values
   end
 
-  def Patient.find_by_patient_names(first_name,other_name,last_name)
+  def self.find_by_patient_names(first_name,other_name,last_name)
     first_name=first_name.strip[0..0]
     other_name=other_name.strip[0..0]
     patient_hash = Hash.new
@@ -1402,7 +1401,7 @@ class Patient < OpenMRS
                           return patient_hash.values
   end
 
-  def Patient.find_by_patient_surname(last_name)
+  def self.find_by_patient_surname(last_name)
     patient_hash = Hash.new
     PatientName.find(:all, :conditions => ["family_name LIKE ?","#{last_name}%"]).collect do |patient_name|
       patient_name.patient
@@ -1418,7 +1417,7 @@ class Patient < OpenMRS
 
 =begin
    This seems incompleted, replaced with new method at top
-   def Patient.merge(patient1,patient2)
+   def self.merge(patient1,patient2)
      merged_patient = Patient.new
      merged_patient.fields #TODO
      merged_patient.birthdate #TODO
@@ -1443,7 +1442,7 @@ class Patient < OpenMRS
    end
 =end
 
-  def Patient.total_number_of_patients_registered(program_name = "HIV")
+  def self.total_number_of_patients_registered(program_name = "HIV")
     program = Program.find_by_name(program_name)
     return if program.blank?
     return Patient.find(:all).collect{|patient|
@@ -1465,7 +1464,7 @@ class Patient < OpenMRS
     }.compact.length
   end
 
-  def Patient.return_visits(patient_type,start_date,end_date)
+  def self.return_visits(patient_type,start_date,end_date)
     start_date =start_date.to_date
     end_date = end_date.to_date
 
@@ -1497,7 +1496,7 @@ class Patient < OpenMRS
     return report
   end
 
-  def Patient.find_patients_adults(patient_type,start_date,end_date)
+  def self.find_patients_adults(patient_type,start_date,end_date)
     case patient_type
     when "Female","Male"
       patients=  Patient.find(:all,:conditions => ["(datediff(Now(),birthdate))> (365*15) and gender=?",patient_type])
@@ -1515,7 +1514,7 @@ class Patient < OpenMRS
   end
 
 
-  def Patient.virtual_register
+  def self.virtual_register
     art_location_name = Location.health_center.name
     patient_register = Hash.new
     Observation.find(:all, :group=>"obs.patient_id", :order => "obs_datetime desc").collect do |obs|
@@ -1675,7 +1674,7 @@ class Patient < OpenMRS
     patient_register
   end
 
-  def Patient.art_clinic_name(location_id)
+  def self.art_clinic_name(location_id)
     location_id= Location.find_by_location_id(location_id).parent_location_id
     Location.find_by_parent_location_id(location_id).name
   end
@@ -2307,7 +2306,7 @@ class Patient < OpenMRS
         end
       end
 
-      def Patient.archive_patient(patient_to_be_archived_id,current_patient)
+      def self.archive_patient(patient_to_be_archived_id,current_patient)
         patient = Patient.find(patient_to_be_archived_id)
         filing_number_identifier_type = PatientIdentifierType.find_by_name("Archived filing number")
         next_filing_number = Patient.next_archive_filing_number
@@ -2362,7 +2361,7 @@ class Patient < OpenMRS
         return "#{new_national_id_no_check_digit}#{check_digit}"
       end
 
-      def Patient.validates_national_id(number)
+      def self.validates_national_id(number)
         number_to_be_checked = number[0..11]
         check_digit = number[-1..-1].to_i
         valid_check_digit =PatientIdentifier.calculate_checkdigit(number_to_be_checked)

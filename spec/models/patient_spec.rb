@@ -3,10 +3,12 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe Patient do
   before(:all) do
     PatientHistoricalOutcome.reset
+    @today = "2009-04-10".to_date
   end
 
   before(:each) do
     Patient.send(:class_variable_set, :@@date_started_art, Hash.new)
+    Date.stubs(:today).returns(@today)
   end
 
   sample({
@@ -284,11 +286,13 @@ describe Patient do
   end
 
   it "should show patient's age" do
-    patient(:andreas).age.should == 38
+    # Andreas is 38 years, 8.6 months old
+    patient(:andreas).age(@today).should == 38
   end
 
   it "should show patient's age in months" do
-    patient(:andreas).age_in_months.should == ((Time.now - patient(:andreas).birthdate.to_time)/1.month).floor
+    # 1970-07-22 to 2009-04-10 is 14142 days, 464.6 months
+    patient(:andreas).age_in_months(@today).should == 464
   end
 
   it "should show if patient is a child or not" do
@@ -304,6 +308,7 @@ describe Patient do
     patient.save
     patient.age = 26
     patient.age.should == 26
+    patient.age("2009-07-20".to_date).should == 26
   end
 
   it "should show age at initiation" do
@@ -973,13 +978,13 @@ EOF
   it "should give weight for patient's age" do
     patient = patient(:andreas)
     patient.birthdate = 8.years.ago
-    patient.weight_for_age.should == 263
+    patient.weight_for_age(@today).should == 266
   end
 
   it "should give height for patient's age" do
     patient = patient(:andreas)
     patient.birthdate = 9.years.ago
-    patient.height_for_age.should == 125
+    patient.height_for_age(@today).should == 126
   end
 
   it "should give recommended appointment date" do
