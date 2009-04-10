@@ -1,6 +1,5 @@
 class Hl7InArchive < OpenMRS
   set_table_name "hl7_in_archive"
-  #hl7_in_archive_id
   set_primary_key "hl7_in_archive_id"
 end
 

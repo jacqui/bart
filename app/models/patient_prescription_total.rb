@@ -32,13 +32,13 @@ class PatientPrescriptionTotal < ActiveRecord::Base
   @@indexing = false
 
   def self.find(*args)
-    d = self.index_date
+    d = index_date
     reindex unless d && d >= Date.today
     super
   end
 
   def self.reset
-    self.reindex
+    reindex
   end
 
   private
@@ -58,7 +58,7 @@ class PatientPrescriptionTotal < ActiveRecord::Base
   end
 
   def self.reindex
-    raise "Sorry I am currently building the drug and prescription indexes. Please refresh the page you were trying to load" if self.indexing?
+    raise "Sorry I am currently building the drug and prescription indexes. Please refresh the page you were trying to load" if indexing?
 
     @@index_date = Date.today
     p = GlobalProperty.find_or_create_by_property('patient_prescription_total_index_date')

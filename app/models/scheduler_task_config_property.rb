@@ -1,7 +1,6 @@
 class SchedulerTaskConfigProperty < OpenMRS
   set_table_name "scheduler_task_config_property"
   belongs_to :scheduler_task_config, :foreign_key => :task_config_id
-  #
   set_primary_key ""
 end
 

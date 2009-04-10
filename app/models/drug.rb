@@ -5,7 +5,6 @@ class Drug < OpenMRS
   has_many :barcodes, :class_name => "DrugBarcode",  :foreign_key => :drug_id
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
-  #drug_id
   set_primary_key "drug_id"
 
   @@drug_hash_by_name = Hash.new
@@ -26,19 +25,18 @@ class Drug < OpenMRS
   end
 
   def type
-    self.concept.concept_sets.collect{|concept_set|
+    concept.concept_sets.collect{|concept_set|
       concept_set.name
     }.flatten.join(", ")
   end
 
   def arv?
-    #    arvs = ["Stavudine Lamivudine", "Stavudine Lamivudine Nevirapine", "Efavirenz", "Zidovudine Lamivudine", "Nevirapine", "Abacavir", "Didanosine", "Lopinavir Ritonavir", "Didanosine", "Tenofovir"]
     arvs = Concept.find_by_name('ARV Drug').concepts.find_all_by_retired(0).map(&:id)
-    return arvs.include?(self.concept.id)
+    return arvs.include?(concept.id)
   end
 
   def to_abbreviation
-    case self.name
+    case name
     when "Stavudine 30 Lamivudine 150"
       return "SL: "
     when "Stavudine 40 Lamivudine 150"
@@ -77,8 +75,6 @@ class Drug < OpenMRS
         drug = Drug.new
         drug.name = drug_name
         drug_concept_name = drug_name.gsub(/ \d+/,"")
-        #puts drug_concept_name
-        #return
         drug_concept = Concept.find_by_name(drug_concept_name)
         if drug_concept.nil?
           # Create the concept for the drug if it doesn't exist
@@ -102,7 +98,7 @@ class Drug < OpenMRS
 
   def month_quantity(year=Date.today.year, month=Date.today.month)
     qty = 0
-    self.drug_orders.each{|drug_order|
+    drug_orders.each{|drug_order|
       order_date = drug_order.order.encounter.encounter_datetime.to_date
       next unless order_date.year == year and order_date.month == month
       next if drug_order.encounter.voided?
@@ -115,7 +111,7 @@ class Drug < OpenMRS
   # e.g.: self.add_to_regimen_type(Concept.find_by_name('ARV first line regimen')) will add this drug an ARV first line regimen drug
   def add_to_regimen_type(regimen_concept)
     return nil if regimen_concept.blank?
-    drug_concept = self.concept
+    drug_concept = concept
     return nil if drug_concept.blank? or User.current_user.nil?
     concept_set = ConceptSet.new(:concept_id => drug_concept.id, :concept_set => regimen_concept.id,
                                  :creator => User.current_user.id, :date_created => Time.now)
@@ -123,7 +119,7 @@ class Drug < OpenMRS
   end
 
   def short_name
-    Concept.find(self.concept_id).short_name rescue nil
+    Concept.find(concept_id).short_name rescue nil
   end
 
 end

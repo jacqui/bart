@@ -8,7 +8,7 @@ class Order < OpenMRS
   belongs_to :user, :foreign_key => :user_id
 
   def patient
-    return self.encounter.patient
+    return encounter.patient
   end
 end
 

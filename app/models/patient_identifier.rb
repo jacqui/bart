@@ -8,16 +8,13 @@ class PatientIdentifier < OpenMRS
   set_primary_keys :patient_id, :identifier, :identifier_type
 
   def all_identifiers
-    PatientIdentifier.find_all_by_patient_id(self.patient_id)
+    PatientIdentifier.find_all_by_patient_id(patient_id)
   end
 
   def self.create(patient_id, identifier, identifier_type_name)
     type_id = PatientIdentifierType.find_by_name(identifier_type_name).id rescue nil
     return false if type_id.blank? || patient_id.blank? || identifier.blank?
-    patient_identifier = self.new()
-    patient_identifier.patient_id = patient_id
-    patient_identifier.identifier = identifier.to_s.gsub("identifier","")
-    patient_identifier.identifier_type = type_id
+    patient_identifier = self.new(:patient_id => patient_id, :identifier => identifier.to_s.gsub("identifier",""), :identifier_type => type_id)
     patient_identifier.save
   end
 
@@ -56,7 +53,7 @@ class PatientIdentifier < OpenMRS
   end
 
   def to_s
-    "#{self.type.name}: #{self.identifier}"
+    "#{type.name}: #{identifier}"
   end
 
   def self.calculate_checkdigit(number)

@@ -2,7 +2,6 @@ class NotificationAlert < OpenMRS
   set_table_name "notification_alert"
   has_many :notification_alert_recipients, :foreign_key => :alert_id
   belongs_to :user, :foreign_key => :user_id
-  #alert_id
   set_primary_key "alert_id"
 end
 

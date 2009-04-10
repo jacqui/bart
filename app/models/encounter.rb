@@ -28,27 +28,27 @@ class Encounter < OpenMRS
   belongs_to :location
 
   def name
-    return self.type.name unless self.type.nil?
+    return type.name unless type.nil?
   end
 
   def to_s
-    "Encounter:#{self.patient.name rescue ''} #{name} Observations:#{observations.length}"
+    "Encounter:#{patient.name rescue ''} #{name} Observations:#{observations.length}"
   end
 
   # NOTE most ART prescription information is stored in the csv file
   # CPT dosage and ITN is stored here
   def to_prescriptions
-    return nil unless self.name == "ART Visit"
+    return nil unless name == "ART Visit"
     concept_prescribe_cotrimoxazole = Concept.find_by_name("Prescribe Cotrimoxazole (CPT)")
     concept_prescribe_itn = Concept.find_by_name("Prescribe Insecticide Treated Net (ITN)")
     concept_yes = Concept.find_by_name("Yes")
     prescriptions = Array.new
     time_period = ""
     amount_remaining_from_last_visit = Hash.new(0)
-    self.observations.each{|observation|
+    observations.each{|observation|
       amount_remaining_from_last_visit[observation.drug] = observation.value_numeric if observation.concept.name =~ /remaining/
     }
-      self.observations.each{|observation|
+      observations.each{|observation|
         if observation.concept_id == Concept.find_by_name("Prescription Time Period").id
           time_period = observation.value_text
         end
@@ -57,7 +57,7 @@ class Encounter < OpenMRS
             prescriptions << Prescription.new(observation.drug, observation.value_text, observation.value_numeric, time_period, amount_remaining_from_last_visit[observation.drug])
         elsif observation.concept_id == concept_prescribe_cotrimoxazole.id && observation.value_coded == concept_yes.id
           cotrimoxazole_drug = Drug.find_by_name("Cotrimoxazole 480")
-          age_in_months = self.patient.age_in_months
+          age_in_months = patient.age_in_months
           if age_in_months > 14*12
             prescriptions << Prescription.new(cotrimoxazole_drug, "Morning", 1, time_period)
             prescriptions << Prescription.new(cotrimoxazole_drug, "Evening", 1, time_period)
@@ -83,7 +83,7 @@ class Encounter < OpenMRS
   end
 
   def to_dispensations
-    prescriptions = self.to_prescriptions
+    prescriptions = to_prescriptions
     dispensations = Hash.new
     #    raise prescriptions.collect{|p|" " + p.quantity.to_s}.to_s
     prescriptions.each{|prescription|
@@ -116,9 +116,9 @@ class Encounter < OpenMRS
   end
 
   def regimen
-    return nil if self.name != "Give drugs"
-    return @@dispensation_encounter_regimen_names[self.encounter_id] unless @@dispensation_encounter_regimen_names.blank?
-    r = DrugOrder.drug_orders_to_regimen(self.drug_orders)
+    return nil if name != "Give drugs"
+    return @@dispensation_encounter_regimen_names[encounter_id] unless @@dispensation_encounter_regimen_names.blank?
+    r = DrugOrder.drug_orders_to_regimen(drug_orders)
     r.name if r
 
     # This code seems wrong, replaced with single regimen check
@@ -157,7 +157,7 @@ class Encounter < OpenMRS
           encounter_mappings["HIV Staging"] = ["ART Visit"]
         end
         # If they are a transfer in with a letter we want the receptionist to copy the staging info using the retrospective staging form
-        if self.patient.transfer_in_with_letter? == true
+        if patient.transfer_in_with_letter? == true
           encounter_mappings["HIV First visit"] = ["HIV Staging"]
           encounter_mappings["HIV Staging"] = ["Height/Weight"]
         end
@@ -167,11 +167,11 @@ class Encounter < OpenMRS
         }
       end
 
-      if self.name == "ART Visit"
-        clinician_referral = self.observations.find_by_concept_name("Refer patient to clinician").first
+      if name == "ART Visit"
+        clinician_referral = observations.find_by_concept_name("Refer patient to clinician").first
         next_encounter_types << "ART Visit" unless clinician_referral.nil? or clinician_referral.answer_concept.name != "Yes"
       end
-      next_encounter_types << encounter_mappings[self.name]
+      next_encounter_types << encounter_mappings[name]
     }
     return next_encounter_types.flatten.compact
   end
@@ -207,7 +207,7 @@ class Encounter < OpenMRS
 
 
   def arv_given?
-    self.orders.each{|order|
+    orders.each{|order|
       order.drug_orders.each{|drug_order|
         return true if drug_order.drug.arv?
       }
@@ -217,10 +217,10 @@ class Encounter < OpenMRS
 
   def add_observation(concept_id)
     observation = Observation.new
-    observation.patient_id = self.patient_id
+    observation.patient_id = patient_id
     observation.concept_id = concept_id
     observation.encounter = self
-    observation.obs_datetime = self.encounter_datetime
+    observation.obs_datetime = encounter_datetime
     observation.location_id = Location.current_location
     return observation
   end
@@ -229,7 +229,7 @@ class Encounter < OpenMRS
     initiation_date = nil
     unless params[:observation].nil?
 
-      if self.name == 'ART Visit'
+      if name == 'ART Visit'
         # TODO: Fix me!!
         # Rails doesn't include fields into params if none of its options are selected
         # So, save Nos if no symptom under Symptoms or Symptom continued.. is selected
@@ -237,7 +237,7 @@ class Encounter < OpenMRS
         symptom_continued_concept = Concept.find_by_name("Symptoms continued..")
         [symptom_concept, symptom_continued_concept].each{|concept|
           if params[:observation]["select:"+concept.id.to_s].nil?
-            self.save_multiple_observations(concept, [''])
+            save_multiple_observations(concept, [''])
           end
         }
       end
@@ -245,7 +245,7 @@ class Encounter < OpenMRS
       provider_username = params["alpha:#{Concept.find_by_name("Provider").id}"]
         unless provider_username.nil?
           provider = User.find_by_username(provider_username)
-          self.provider_id = provider.user_id unless provider.nil?
+          provider_id = provider.user_id unless provider.nil?
         end
 
       # First find all dates then, create datetimes and save them as observations
@@ -264,7 +264,7 @@ class Encounter < OpenMRS
           next if year == "" or month == "" or day == ""
           estimated = false
           if year == "Unknown"
-            observation = self.add_observation(concept_id)
+            observation = add_observation(concept_id)
             observation.value_coded = Concept.find_by_name("Unknown").id
             observation.value_modifier = "es" if estimated
             observation.save
@@ -286,7 +286,7 @@ class Encounter < OpenMRS
           observation.save
 
           # initiation date will be used as obs_datetime for vitals
-          if self.name == "HIV First visit"
+          if name == "HIV First visit"
             initiation_date = date if observation.concept.name == "Date of ART initiation"
           end
         }
@@ -298,10 +298,10 @@ class Encounter < OpenMRS
       type, concept_id = type_and_concept_id.split(":")
       next if type.nil? or concept_id.nil?
       if concept_id.to_i == Concept.find_by_name('Provider').id
-        self.provider_id = User.find_by_username(answer).id rescue nil
+        provider_id = User.find_by_username(answer).id rescue nil
         next
       end
-      observation = self.add_observation(concept_id)
+      observation = add_observation(concept_id)
       need_save = true
       if answer == "Missing"
         observation.value_coded = Concept.find_by_name("Missing").id
@@ -311,7 +311,7 @@ class Encounter < OpenMRS
         case type
         when "select"
           if answer.class == Array # for multi_select like symptoms
-            self.save_multiple_observations(Concept.find(concept_id), answer)
+            save_multiple_observations(Concept.find(concept_id), answer)
             need_save = false
           else
             observation.value_coded = answer
@@ -330,7 +330,7 @@ class Encounter < OpenMRS
         end
       end
 
-      if self.name == "HIV First visit" and (observation.concept.name == "Height" or
+      if name == "HIV First visit" and (observation.concept.name == "Height" or
                                              observation.concept.name == "Weight")
                                              observation.obs_datetime = initiation_date
       end
@@ -341,7 +341,7 @@ class Encounter < OpenMRS
 
 
     params["observation_multi"].each{|concept_id|
-      observation = self.add_observation(concept_id,encounter)
+      observation = add_observation(concept_id,encounter)
       observation.value_coded = Concept.find_by_name("Yes").id
       observation.save
     } unless params["observation_multi"].nil?
@@ -358,7 +358,7 @@ class Encounter < OpenMRS
   #
   def save_multiple_observations(concept, answers)
     concept.answer_options.each{|option|
-      observation = self.add_observation(option.id)
+      observation = add_observation(option.id)
       if answers.include?(option.id.to_s)
         observation.value_coded = Concept.find_by_name('Yes unknown cause').id
       else
@@ -373,42 +373,42 @@ class Encounter < OpenMRS
     return if reason.blank?
 
     # void this encounter's observations
-    self.observations.each{|observation|
+    observations.each{|observation|
       observation.void!(reason)
-    } unless self.name == "Give drugs"
+    } unless name == "Give drugs"
 
     # void this encounter's orders
-    self.orders.each{|order|
+    orders.each{|order|
       order.void!(reason)
-    } if self.name == "Give drugs"
+    } if name == "Give drugs"
 
-    self.patient.reset_outcomes
+    patient.reset_outcomes
   end
 
   def voided?
 
     # check void status for encounter's orders if its a Dispensation
-    self.drug_orders.each{|drug_order|
+    drug_orders.each{|drug_order|
       return false unless drug_order.order.voided?
-    } if self.name == "Give drugs"
+    } if name == "Give drugs"
 
     # check void status of this encounter's observations
-    self.observations.each{|observation|
+    observations.each{|observation|
       return false unless observation.voided?
-    } unless self.name == "Give drugs"
+    } unless name == "Give drugs"
 
     return true
   end
 
   def void_reason
-    return nil unless self.voided?
+    return nil unless voided?
 
     # get void reason from the first observation or order
-    unless self.name == "Give drugs"
-      first_observation = self.observations.first
+    unless name == "Give drugs"
+      first_observation = observations.first
       return first_observation.void_reason unless first_observation.blank?
     else
-      first_order = self.orders.first
+      first_order = orders.first
       return first_order.void_reason unless first_order.blank?
     end
     nil
@@ -426,7 +426,7 @@ class Encounter < OpenMRS
   end
 
   def retrospective?
-    return true if self.encounter_datetime.hour == 0 and self.encounter_datetime.min == 0 and self.encounter_datetime.sec == 1
+    return true if encounter_datetime.hour == 0 and encounter_datetime.min == 0 and encounter_datetime.sec == 1
     false
   end
 
@@ -497,7 +497,7 @@ class Encounter < OpenMRS
   end
 
   def self.encounters_by_start_date_end_date_and_user(start_date,end_date,user_id)
-    self.find(:all,:conditions => ["Date(encounter_datetime) >=? and Date(encounter_datetime) <=? and creator =?",start_date,end_date,user_id],:order =>"encounter_datetime desc") rescue nil
+    find(:all,:conditions => ["Date(encounter_datetime) >=? and Date(encounter_datetime) <=? and creator =?",start_date,end_date,user_id],:order =>"encounter_datetime desc") rescue nil
   end
 
   def update_outcomes
@@ -511,19 +511,19 @@ class Encounter < OpenMRS
     INNER JOIN concept_set as arv_drug_concepts ON
     arv_drug_concepts.concept_set = 460 AND
     arv_drug_concepts.concept_id = drug.concept_id
-    WHERE encounter.encounter_id = #{self.id}
+    WHERE encounter.encounter_id = #{id}
       UNION
     SELECT obs.patient_id, obs.obs_datetime, obs.value_coded
     FROM obs
-    WHERE obs.concept_id = 28 AND obs.encounter_id = #{self.id} AND obs.voided = 0
+    WHERE obs.concept_id = 28 AND obs.encounter_id = #{id} AND obs.voided = 0
       UNION
     SELECT obs.patient_id, obs.obs_datetime, 325
     FROM obs
-    WHERE obs.concept_id = 372 AND obs.value_coded <> 3 AND obs.encounter_id = #{self.id} AND obs.voided = 0
+    WHERE obs.concept_id = 372 AND obs.value_coded <> 3 AND obs.encounter_id = #{id} AND obs.voided = 0
       UNION
     SELECT obs.patient_id, obs.obs_datetime, 386
     FROM obs
-    WHERE obs.concept_id = 367 AND obs.value_coded <> 3 AND obs.encounter_id = #{self.id} AND obs.voided = 0;
+    WHERE obs.concept_id = 367 AND obs.value_coded <> 3 AND obs.encounter_id = #{id} AND obs.voided = 0;
       EOF
 
     # This shows that encounter.update_outcomes does not update outcomes that are not triggered by encounter updates

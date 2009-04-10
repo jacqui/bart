@@ -2,7 +2,6 @@ class ConceptDatatype < OpenMRS
   set_table_name "concept_datatype"
   has_many :concepts, :foreign_key => :datatype_id
   belongs_to :user, :foreign_key => :user_id
-  #concept_datatype_id
   set_primary_key "concept_datatype_id"
 end
 

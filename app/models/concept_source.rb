@@ -2,7 +2,6 @@ class ConceptSource < OpenMRS
   set_table_name "concept_source"
   has_many :concept_maps, :foreign_key => :source
   belongs_to :user, :foreign_key => :user_id
-  #concept_source_id
   set_primary_key "concept_source_id"
 end
 

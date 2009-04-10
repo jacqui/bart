@@ -4,7 +4,6 @@ class ConceptProposal < OpenMRS
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :encounter, :foreign_key => :encounter_id
-  #concept_proposal_id
   set_primary_key "concept_proposal_id"
 end
 

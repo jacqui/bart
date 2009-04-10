@@ -5,7 +5,6 @@ class FormField < OpenMRS
   belongs_to :field, :foreign_key => :field_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :form, :foreign_key => :form_id
-  #form_field_id
   set_primary_key "form_field_id"
 end
 

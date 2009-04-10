@@ -25,9 +25,9 @@ class Regimen
 
   def to_drug_order
     drug_order = DrugOrder.new()
-    drug_order.frequency = self.frequency
-    drug_order.drug = Drug.find_by_name(self.drug)
-    drug_order.units = self.units
+    drug_order.frequency = frequency
+    drug_order.drug = Drug.find_by_name(drug)
+    drug_order.units = units
     drug_order
   end
 

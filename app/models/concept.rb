@@ -31,7 +31,7 @@ class Concept < OpenMRS
   def self.load_cache
     @@concept_hash_by_name = Hash.new
     @@concept_hash_by_id = Hash.new
-    self.find(:all).each{|concept|
+    find(:all).each{|concept|
       @@concept_hash_by_name[concept.name.downcase] = concept
       @@concept_hash_by_id[concept.id] = concept
     }
@@ -50,37 +50,37 @@ class Concept < OpenMRS
   end
 
   def to_s
-    self.name
+    name
   end
 
   def to_short_s
-    self.short_name.blank? ? self.name : self.short_name
+    short_name.blank? ? name : short_name
   end
 
   def add_concept_answer(concept_name)
     concept_answer_option = Concept.find_by_name(concept_name)
-    unless self.answer_options.include?(concept_answer_option)
+    unless answer_options.include?(concept_answer_option)
       concept_answer = ConceptAnswer.new()
-      concept_answer.concept_id = self.concept_id
+      concept_answer.concept_id = concept_id
       concept_answer.answer_concept = concept_answer_option.concept_id
       concept_answer.save
     end
   end
 
   def add_yes_no_concept_answers
-    self.add_concept_answer("Yes")
-    self.add_concept_answer("No")
+    add_concept_answer("Yes")
+    add_concept_answer("No")
     true
   end
 
   def add_yes_no_unknown_concept_answers
-    self.add_yes_no_concept_answers
-    self.add_concept_answer("Unknown")
+    add_yes_no_concept_answers
+    add_concept_answer("Unknown")
   end
 
   def add_yes_no_unknown_not_applicable_concept_answers
-    self.add_yes_no_unknown_concept_answers
-    self.add_concept_answer("Not applicable")
+    add_yes_no_unknown_concept_answers
+    add_concept_answer("Not applicable")
   end
 
   def self.create_start_substitute_switch_answers_for_regimen_type
@@ -100,7 +100,7 @@ class Concept < OpenMRS
 
   def create_field
     field = Field.new
-    case self.concept_datatype.name
+    case concept_datatype.name
     when "Coded"
       field.type = FieldType.find_by_name("select")
     when "Number"
@@ -110,7 +110,7 @@ class Concept < OpenMRS
     else
       field.type = FieldType.find_by_name("alpha")
     end
-    field.name = self.name
+    field.name = name
     field.concept = self
     field.save
   end
@@ -119,18 +119,6 @@ class Concept < OpenMRS
     #    c = self
     #    c.name = c.name.humanize.gsub(/who/i,"WHO").gsub(/(^| )art/i,"#{$1}ART").gsub(/cd4/i, "CD4").gsub(/cpt/i,"CPT").gsub(/arv/i,"ARV").gsub(/hiv/i,"HIV").gsub(/pcp/i,"PCP"); c.save
   end
-
-=begin
-   def to_fixture_name
-     raise "No name for concept #{id}" unless self.name || self.short_name
-     n = self.name.downcase if self.name
-     n ||= self.short_name.downcase
-     n = n.gsub(/(\s|-|\/)/, '_')
-     n = n.gsub(/__/, '_')
-     n = n.gsub(/[^a-z0-9_]/, '')
-     n
-   end
-=end
 
 end
 

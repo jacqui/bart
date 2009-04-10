@@ -12,7 +12,7 @@ class Prescription
     return 1 if frequency == "Once"
 
     time_period_days = nil
-    self.time_period.downcase.match(/(\d+) (.*)/)
+    time_period.downcase.match(/(\d+) (.*)/)
     time_amount = $1.to_i # number of weeks or months
     time_unit = $2  # weeks or months
 
@@ -39,10 +39,10 @@ class Prescription
     quantity = 0
 
     if frequency =~ /(morning|evening)/i
-      quantity =  total_number_of_days * self.dose_amount.to_f * 1
+      quantity =  total_number_of_days * dose_amount.to_f * 1
     elsif frequency == "Weekly"
       raise "Weekly not completed yet"
-      quantity = total_number_of_days * self.dose_amount.to_f / 7 #TODO
+      quantity = total_number_of_days * dose_amount.to_f / 7 #TODO
     end
 
     quantity -= @amount_remaining_from_last_visit

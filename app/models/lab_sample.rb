@@ -3,7 +3,6 @@ class LabSample < OpenMRS
   has_many :lab_parameter, :foreign_key => :sample_id
 
   def self.cd4_trail(patient_identifier)
-    #sample_ids_and_test_dates = self.lab_samples(patient_identifier)
     sample_ids_and_test_dates = LabSample.find_by_sql(["SELECT * FROM Lab_Sample join LabTestTable where Lab_Sample.AccessionNum = LabTestTable.accessionNum and LabTestTable.pat_id IN (?)",patient_identifier]) rescue nil
     return if sample_ids_and_test_dates.blank?
 
@@ -17,8 +16,7 @@ class LabSample < OpenMRS
   end
 
   def self.lab_samples(patient_identifier)
-    #sample_ids_and_test_dates = LabSample.find(:all,:conditions=>["PATIENTID IN (?)",patient_identifier]).collect{|sample|[sample.Sample_ID,sample.TESTDATE]} rescue nil
-    accession_num = self.find(:all,:conditions=>["patientid IN (?)",patient_identifier]).collect{|sample|sample.AccessionNum.to_i} rescue nil
+    accession_num = find(:all,:conditions=>["patientid IN (?)",patient_identifier]).collect{|sample|sample.AccessionNum.to_i} rescue nil
     accession_num_from_lab_test_table = LabTestTable.find(:all,:conditions=>["PAT_ID IN (?)",patient_identifier]).collect{|sample|sample.AccessionNum.to_i} rescue nil
     accession_num =  accession_num + accession_num_from_lab_test_table unless accession_num_from_lab_test_table.blank?
     LabSample.find(:all,:conditions=>["AccessionNum IN (?)",accession_num]).collect{|sample|[sample.Sample_ID,sample.TESTDATE]} rescue nil

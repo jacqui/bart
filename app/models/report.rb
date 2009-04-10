@@ -112,149 +112,149 @@ class Report < OpenMRS
 
     }
     return outcomes
-end
-
-def self.cohort_date_range(quarter_text, start_date=nil, end_date=nil)
-  quarter_end_hash = {"Q1"=>"mar-31", "Q2"=>"jun-30","Q3"=>"sep-30","Q4"=>"dec-31"}
-  quarter_start = nil
-  quarter_end = nil
-  if quarter_text == "Cumulative"
-    quarter_start = start_date.to_date rescue nil if start_date
-    quarter_end = end_date.to_date rescue nil if end_date
-
-    quarter_start = Encounter.find(:first, :order => 'encounter_datetime').encounter_datetime.to_date if quarter_start.nil?
-    if quarter_end.nil?
-      quarter_end = Date.today
-      censor_date = (quarter_end.year-1).to_s + "-" + "dec-31"
-
-      quarter_end_hash.each{|a,b|
-        break if quarter_end < (quarter_end.year.to_s+"-"+b).to_date
-        censor_date = quarter_end.year.to_s+"-"+b
-      }
-      quarter_end = censor_date.to_date
-    end
-
-  else
-    # take the cohort string that was passed in ie. "Q1 2006", split it on the space and save it as two separate variables
-    quarter_text.gsub!('+',' ')
-    quarter_text.gsub!('_',' ')
-    quarter, quarter_year = quarter_text.split(" ")
-    return [nil, nil] unless quarter =~ /Q[1-4]/ and quarter_year =~ /\d\d\d\d/
-      quarter_month_hash = {"Q1"=>"January", "Q2"=>"April","Q3"=>"July","Q4"=>"October"}
-    quarter_month = quarter_month_hash[quarter]
-
-    quarter_start = (quarter_year + "-" + quarter_month + "-01").to_date
-    quarter_end = (quarter_year + "-" + quarter_end_hash[quarter]).to_date
   end
 
-  return [quarter_start, quarter_end]
+  def self.cohort_date_range(quarter_text, start_date=nil, end_date=nil)
+    quarter_end_hash = {"Q1"=>"mar-31", "Q2"=>"jun-30","Q3"=>"sep-30","Q4"=>"dec-31"}
+    quarter_start = nil
+    quarter_end = nil
+    if quarter_text == "Cumulative"
+      quarter_start = start_date.to_date rescue nil if start_date
+      quarter_end = end_date.to_date rescue nil if end_date
 
-end
+      quarter_start = Encounter.find(:first, :order => 'encounter_datetime').encounter_datetime.to_date if quarter_start.nil?
+      if quarter_end.nil?
+        quarter_end = Date.today
+        censor_date = (quarter_end.year-1).to_s + "-" + "dec-31"
 
-def self.user_stat_data(start_date,end_date,user_name)
-  user_id = User.find_by_username(user_name).id rescue nil
-  return if user_id.blank?
-  encounters = Encounter.encounters_by_start_date_end_date_and_user(start_date.to_date,end_date.to_date,user_id)
-  encounter_count = Hash.new(0)
-  encounter_count_to_display = Hash.new()
-  encounters.each{|e|
-    next if e.name == "Barcode scan"
-    encounter_count["#{e.name},#{e.encounter_datetime.strftime('%Y_%m_%d')}"]+=1
-  }
+        quarter_end_hash.each{|a,b|
+          break if quarter_end < (quarter_end.year.to_s+"-"+b).to_date
+          censor_date = quarter_end.year.to_s+"-"+b
+        }
+        quarter_end = censor_date.to_date
+      end
+
+    else
+      # take the cohort string that was passed in ie. "Q1 2006", split it on the space and save it as two separate variables
+      quarter_text.gsub!('+',' ')
+      quarter_text.gsub!('_',' ')
+      quarter, quarter_year = quarter_text.split(" ")
+      return [nil, nil] unless quarter =~ /Q[1-4]/ and quarter_year =~ /\d\d\d\d/
+        quarter_month_hash = {"Q1"=>"January", "Q2"=>"April","Q3"=>"July","Q4"=>"October"}
+      quarter_month = quarter_month_hash[quarter]
+
+      quarter_start = (quarter_year + "-" + quarter_month + "-01").to_date
+      quarter_end = (quarter_year + "-" + quarter_end_hash[quarter]).to_date
+    end
+
+    return [quarter_start, quarter_end]
+
+  end
+
+  def self.user_stat_data(start_date,end_date,user_name)
+    user_id = User.find_by_username(user_name).id rescue nil
+    return if user_id.blank?
+    encounters = Encounter.encounters_by_start_date_end_date_and_user(start_date.to_date,end_date.to_date,user_id)
+    encounter_count = Hash.new(0)
+    encounter_count_to_display = Hash.new()
+    encounters.each{|e|
+      next if e.name == "Barcode scan"
+      encounter_count["#{e.name},#{e.encounter_datetime.strftime('%Y_%m_%d')}"]+=1
+    }
     encounter_count.each{|x,y|
       next if x.split(",").first == ""
       encounter_count_to_display[x.split(",").first]+= x.split(",").last + ":" + y.to_s + ";" unless encounter_count_to_display[x.split(",").first].blank?
       encounter_count_to_display[x.split(",").first]= x.split(",").last + ":" + y.to_s + ";" if encounter_count_to_display[x.split(",").first].blank?
     }
     encounter_count_to_display
-end
-
-
-def self.stats_to_show(stat_type)
-  encounters = stat_type.gsub("_","-").split(";")
-  stats_per_day = Hash.new()
-  encounters.each{|e|stats_per_day[e.split(':').first.to_date] = e.split(':').last}
-  week = Hash.new()
-  week_count = 1
-  key = "week_#{week_count}"
-  week_data = self.create_resuts_for_individual_stats_per_week(stats_per_day.sort{|a,b|b<=>a}.map{|x,y|x}.first.to_date)
-  week[key] = week_data
-
-  stats_per_day.sort{|a,b|b<=>a}.each{|date,value|
-    valid_key = ""
-    week.each{|x,y|valid_key = x if week[key].include?(date.strftime("%a, %d %b %Y"))}
-    key = "" if valid_key.blank?
-
-    if key == "" then
-      week_data = self.create_resuts_for_individual_stats_per_week(date.to_date)
-      key = "week_#{week_count+=1}"
-      week[key]=week_data
-      week[key][date.to_date.strftime("%u").to_i - 1] = "#{date.strftime("%a, %d %b %Y")}: #{value}"
-    else
-      week[key][date.to_date.strftime("%u").to_i - 1] = "#{date.strftime("%a, %d %b %Y")}: #{value}"
-    end
-  }
-  week
-end
-
-def self.create_resuts_for_individual_stats_per_week(date)
-
-  case date.strftime('%A')
-  when 'Monday'
-    week = [date,date + 1.day,date + 2.day,date + 3.day,date + 4.day,date + 5.day,date + 6.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Tuesday'
-    week = [date - 1.day,date,date + 1.day,date + 2.day,date + 3.day,date + 4.day,date + 5.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Wednesday'
-    week = [date - 2.day,date -1.day,date,date + 1.day,date + 2.day,date + 3.day,date + 4.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Thursday'
-    week = [date - 3.day,date - 2.day,date - 1.day,date,date + 1.day,date + 2.day,date + 3.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Friday'
-    week = [date - 4.day,date - 3.day,date - 2.day,date - 1.day,date,date + 1.day,date + 2.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Saturday'
-    week = [date - 5.day,date - 4.day,date - 3.day,date - 2.day,date - 1.day,date,date + 1.day]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
-  when 'Sunday'
-    week = [date - 6.day,date - 5.day,date - 4.day,date - 3.day,date - 2.day,date -1.day,date]
-    week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
   end
-end
 
-def self.detail_user_encounter_results_html(data,stat_name,user_name)
-  html = ""
-  stat_name ||=""
-  user_name ||=""
-  data.sort{|b,a|b.to_s.split("_")[1].to_i<=>a.to_s.split("_")[1].to_i}.each{|key,v|
-    results_to_be_passed_string = "#{v[0][17..-1].to_i rescue 0},#{v[1][17..-1].to_i rescue 0},#{v[2][17..-1].to_i rescue 0},#{v[3][17..-1].to_i rescue 0},#{v[4][17..-1].to_i rescue 0},#{v[5][17..-1].to_i rescue 0},#{v[6][17..-1].to_i rescue 0}"
+
+  def self.stats_to_show(stat_type)
+    encounters = stat_type.gsub("_","-").split(";")
+    stats_per_day = Hash.new()
+    encounters.each{|e|stats_per_day[e.split(':').first.to_date] = e.split(':').last}
+    week = Hash.new()
+    week_count = 1
+    key = "week_#{week_count}"
+    week_data = self.create_resuts_for_individual_stats_per_week(stats_per_day.sort{|a,b|b<=>a}.map{|x,y|x}.first.to_date)
+    week[key] = week_data
+
+    stats_per_day.sort{|a,b|b<=>a}.each{|date,value|
+      valid_key = ""
+      week.each{|x,y|valid_key = x if week[key].include?(date.strftime("%a, %d %b %Y"))}
+      key = "" if valid_key.blank?
+
+      if key == "" then
+        week_data = self.create_resuts_for_individual_stats_per_week(date.to_date)
+        key = "week_#{week_count+=1}"
+        week[key]=week_data
+        week[key][date.to_date.strftime("%u").to_i - 1] = "#{date.strftime("%a, %d %b %Y")}: #{value}"
+      else
+        week[key][date.to_date.strftime("%u").to_i - 1] = "#{date.strftime("%a, %d %b %Y")}: #{value}"
+      end
+    }
+    week
+  end
+
+  def self.create_resuts_for_individual_stats_per_week(date)
+
+    case date.strftime('%A')
+    when 'Monday'
+      week = [date,date + 1.day,date + 2.day,date + 3.day,date + 4.day,date + 5.day,date + 6.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Tuesday'
+      week = [date - 1.day,date,date + 1.day,date + 2.day,date + 3.day,date + 4.day,date + 5.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Wednesday'
+      week = [date - 2.day,date -1.day,date,date + 1.day,date + 2.day,date + 3.day,date + 4.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Thursday'
+      week = [date - 3.day,date - 2.day,date - 1.day,date,date + 1.day,date + 2.day,date + 3.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Friday'
+      week = [date - 4.day,date - 3.day,date - 2.day,date - 1.day,date,date + 1.day,date + 2.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Saturday'
+      week = [date - 5.day,date - 4.day,date - 3.day,date - 2.day,date - 1.day,date,date + 1.day]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    when 'Sunday'
+      week = [date - 6.day,date - 5.day,date - 4.day,date - 3.day,date - 2.day,date -1.day,date]
+      week.collect{|week_days|week_days.strftime("%a, %d %b %Y")}
+    end
+  end
+
+  def self.detail_user_encounter_results_html(data,stat_name,user_name)
+    html = ""
+    stat_name ||=""
+    user_name ||=""
+    data.sort{|b,a|b.to_s.split("_")[1].to_i<=>a.to_s.split("_")[1].to_i}.each{|key,v|
+      results_to_be_passed_string = "#{v[0][17..-1].to_i rescue 0},#{v[1][17..-1].to_i rescue 0},#{v[2][17..-1].to_i rescue 0},#{v[3][17..-1].to_i rescue 0},#{v[4][17..-1].to_i rescue 0},#{v[5][17..-1].to_i rescue 0},#{v[6][17..-1].to_i rescue 0}"
       total = 0
-    results_to_be_passed_string.split(",").each{|x|total+=x.to_i rescue ""}
-    date = "#{v[0][0..15].to_date.strftime('%d-%b-%Y')}"
-    html+= "<tr><td class='button_td'><input class='test_name' type=\"button\" onmousedown=\"document.location='/reports/user_stats_graph?id=#{results_to_be_passed_string}&date=#{date}&user_name=#{user_name}&stat_name=#{stat_name}';\" value=\"#{v[0][0..15].to_date.strftime('%d-%b-%Y')} - #{v[6][0..15].to_date.strftime('%d-%b-%Y')}\"/></td><td class='data_td'>#{v[0][17..-1]}</td><td class='data_td'>#{v[1][17..-1]}</td><td class='data_td'>#{v[2][17..-1]}</td><td class='data_td'>#{v[3][17..-1]}</td><td class='data_td'>#{v[4][17..-1]}</td><td class='data_td'>#{v[5][17..-1]}</td><td class='data_td'>#{v[6][17..-1]}</td><td class='data_totals_td'>#{total}</td></tr>"
-  }
+      results_to_be_passed_string.split(",").each{|x|total+=x.to_i rescue ""}
+      date = "#{v[0][0..15].to_date.strftime('%d-%b-%Y')}"
+      html+= "<tr><td class='button_td'><input class='test_name' type=\"button\" onmousedown=\"document.location='/reports/user_stats_graph?id=#{results_to_be_passed_string}&date=#{date}&user_name=#{user_name}&stat_name=#{stat_name}';\" value=\"#{v[0][0..15].to_date.strftime('%d-%b-%Y')} - #{v[6][0..15].to_date.strftime('%d-%b-%Y')}\"/></td><td class='data_td'>#{v[0][17..-1]}</td><td class='data_td'>#{v[1][17..-1]}</td><td class='data_td'>#{v[2][17..-1]}</td><td class='data_td'>#{v[3][17..-1]}</td><td class='data_td'>#{v[4][17..-1]}</td><td class='data_td'>#{v[5][17..-1]}</td><td class='data_td'>#{v[6][17..-1]}</td><td class='data_totals_td'>#{total}</td></tr>"
+    }
     html
-end
+  end
 
-def self.genrept_hiv_reception(start_date,end_date)
-  encounter_types = EncounterType.find(:all,:conditions => ["(name=? or name=?)","General Reception","HIV Reception"]).map{|type|type.id}  rescue nil
+  def self.genrept_hiv_reception(start_date,end_date)
+    encounter_types = EncounterType.find(:all,:conditions => ["(name=? or name=?)","General Reception","HIV Reception"]).map{|type|type.id}  rescue nil
 
-  hiv_ecounters = Encounter.find(:all,:conditions => ["encounter_type=? and (encounter_datetime >=? and encounter_datetime <=?)",encounter_types.first,start_date.to_date,end_date.to_date],:group => "patient_id",:order => "encounter_datetime asc")
-  genrept_patients = Encounter.find(:all,:conditions => ["encounter_type=? and (encounter_datetime >=? and encounter_datetime <=?)",encounter_types.last,start_date.to_date,end_date.to_date],:group => "patient_id",:order => "encounter_datetime asc")
-  all_patients = Hash.new()
-  hiv_patients = Hash.new()
-  hiv_ecounters.each{|enc|
-    hiv_patients[enc.patient_id] = "#{enc.encounter_type},#{enc.encounter_datetime.to_date}" if hiv_patients[enc.patient_id].blank?
-  }
+    hiv_ecounters = Encounter.find(:all,:conditions => ["encounter_type=? and (encounter_datetime >=? and encounter_datetime <=?)",encounter_types.first,start_date.to_date,end_date.to_date],:group => "patient_id",:order => "encounter_datetime asc")
+    genrept_patients = Encounter.find(:all,:conditions => ["encounter_type=? and (encounter_datetime >=? and encounter_datetime <=?)",encounter_types.last,start_date.to_date,end_date.to_date],:group => "patient_id",:order => "encounter_datetime asc")
+    all_patients = Hash.new()
+    hiv_patients = Hash.new()
+    hiv_ecounters.each{|enc|
+      hiv_patients[enc.patient_id] = "#{enc.encounter_type},#{enc.encounter_datetime.to_date}" if hiv_patients[enc.patient_id].blank?
+    }
 
     genrept_patients.each{|enc|
       all_patients[enc.patient_id] = "#{enc.encounter_type},#{enc.encounter_datetime.to_date};#{hiv_patients[enc.patient_id]}" unless hiv_patients[enc.patient_id].blank?
     }
 
-      all_patients
-end
+    all_patients
+  end
 
 end
 

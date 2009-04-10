@@ -5,15 +5,15 @@ class DrugOrder < OpenMRS
   belongs_to :order
 
   def to_s
-    "#{self.drug.name}: #{self.quantity} (ARV: #{self.arv?})"
+    "#{drug.name}: #{quantity} (ARV: #{arv?})"
   end
 
   def to_prescription_s
-    s = "#{self.drug.name rescue 'Unknown'}: "
-    s << "#{self.quantity}#{self.drug.units} " if self.quantity
-    s << "#{self.drug.dosage_form rescue 'Units'} " if self.drug && self.drug.dosage_form
-    if self.frequency && self.units
-      s << "#{self.frequency}: #{self.units}"
+    s = "#{drug.name rescue 'Unknown'}: "
+    s << "#{quantity}#{drug.units} " if quantity
+    s << "#{drug.dosage_form rescue 'Units'} " if drug && drug.dosage_form
+    if frequency && units
+      s << "#{frequency}: #{units}"
     else
       s << "No prescription given"
     end
@@ -21,32 +21,32 @@ class DrugOrder < OpenMRS
   end
 
   def date
-    return self.encounter.encounter_datetime.to_date rescue nil
+    return encounter.encounter_datetime.to_date rescue nil
   end
 
   def encounter
-    return self.order.encounter
+    return order.encounter
   end
 
   def arv?
-    return self.drug.arv?
+    return drug.arv?
   end
 
   # This captures hanging pills
   def quantity_remaining_from_last_order
     quantity_remaining = 0
-    self.prescription_encounter.observations.find_by_concept_name("Whole tablets remaining and brought to clinic").each{|observation|
+    prescription_encounter.observations.find_by_concept_name("Whole tablets remaining and brought to clinic").each{|observation|
       next if observation.value_numeric.nil?
       # TODO This is a bad hack to handle old dirty data which saved all tablet remaining calculations as SL 30/150
-      quantity_remaining += observation.value_numeric if observation.drug == self.drug or (self.drug.name.match(/Stavudine/) and observation.drug == Drug.find_by_name("Stavudine 30 Lamivudine 150"))
-    } unless self.prescription_encounter.nil?
+      quantity_remaining += observation.value_numeric if observation.drug == drug or (drug.name.match(/Stavudine/) and observation.drug == Drug.find_by_name("Stavudine 30 Lamivudine 150"))
+    } unless prescription_encounter.nil?
     return quantity_remaining
   end
 
   def prescriptions
-    return self.prescription_encounter.to_prescriptions.each{|prescription|
-      next unless prescription.drug == self.drug
-    }.compact unless self.prescription_encounter.nil?
+    return prescription_encounter.to_prescriptions.each{|prescription|
+      next unless prescription.drug == drug
+    }.compact unless prescription_encounter.nil?
   end
 
   def daily_consumption
@@ -55,10 +55,10 @@ class DrugOrder < OpenMRS
     #   Days since drugs given
     daily_consumption = 0
     # Look for the presciption that corresponds with the current drug_order
-    self.prescriptions.each{|prescription|
-      daily_consumption += prescription.dose_amount if prescription.drug == self.drug and prescription.frequency.match(/Morning|Evening|Daily/)
+    prescriptions.each{|prescription|
+      daily_consumption += prescription.dose_amount if prescription.drug == drug and prescription.frequency.match(/Morning|Evening|Daily/)
       daily_consumption += prescription.dose_amount/7.0 if prescription.frequency.match(/Weekly/) # Just an example
-    } unless self.prescriptions.nil?
+    } unless prescriptions.nil?
     if daily_consumption != 0
       return daily_consumption
     else
@@ -71,7 +71,7 @@ class DrugOrder < OpenMRS
   end
 
   def quantity_including_amount_remaining_from_last_order
-    self.quantity + self.quantity_remaining_from_last_order
+    quantity + quantity_remaining_from_last_order
   end
 
   def self.recommended_art_prescription(weight)
@@ -238,7 +238,7 @@ class DrugOrder < OpenMRS
   end
 
   def prescription_encounter
-    dispensation_encounter = self.encounter
+    dispensation_encounter = encounter
     # use the date from the dispensing encounter to find the corresponding prescription encounter
     prescription_encounter = dispensation_encounter.patient.encounters.find_by_type_name_and_date("ART Visit", Date.parse(dispensation_encounter.encounter_datetime.to_s)).last
   end
@@ -248,7 +248,7 @@ class DrugOrder < OpenMRS
     drugs_dispensed_last_time = Hash.new
     previous_art_drug_orders = patient.previous_art_drug_orders(visit_date)
     previous_art_visit_date = previous_art_drug_orders.last.encounter.encounter_datetime.to_s.to_date
-    amount_given_last_time = self.amount_given_last_time(patient,previous_art_visit_date).to_s.to_i rescue 0
+    amount_given_last_time = amount_given_last_time(patient,previous_art_visit_date).to_s.to_i rescue 0
 
     previous_art_drug_orders.collect{|drug_order|
       drugs_dispensed_last_time[drug_order.drug] = true
@@ -264,7 +264,7 @@ class DrugOrder < OpenMRS
       expected_amount_remaining+= art_amount_remaining_if_adherent[drug] rescue 0
     }
 
-    pills_remaining = self.amount_given_last_time(patient,previous_art_visit_date)
+    pills_remaining = amount_given_last_time(patient,previous_art_visit_date)
     amount_remaining = 0
     pills_remaining.map{|x|amount_remaining+=x.value_numeric}
     amount_remaining = amount_remaining.round
@@ -274,7 +274,7 @@ class DrugOrder < OpenMRS
     return (100*(amount_given_last_time - amount_remaining) / (amount_given_last_time - expected_amount_remaining)).round
   end
   def after_save
-    self.order.encounter.patient.reset_regimens
+    order.encounter.patient.reset_regimens
   end
 
 end
