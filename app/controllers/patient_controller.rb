@@ -505,18 +505,14 @@ end
     patient = Patient.find(session[:patient_id])
     if params[:patient]
       patient.add_programs(Program.find(params[:patient][:program_id]))
-      redirect_to(:controller => 'patient', :action => "menu")
     else
       # Only show programs patient isn't already in
       @available_programs = User.current_user.current_programs - patient.programs
       if @available_programs.length == 1
         patient.add_programs(@available_programs)
-        redirect_to(:controller => 'patient', :action => "menu")
-      elsif @available_programs.length == 0
-        #flash[:error] = "No available programs for this patient"
-        redirect_to(:controller => 'patient', :action => "menu")
       end
     end
+    redirect_to(:controller => 'patient', :action => "menu")
   end
 
 
@@ -617,7 +613,7 @@ end
     else
       @patient = Patient.find(session[:patient_id])
 
-      if @patient.available_programs.nil? and @user.current_programs.length > 0
+      if @patient.available_programs.empty? and @user.current_programs.length > 0
         redirect_to :controller => "form", :action => "add_programs" and return
       end
 
