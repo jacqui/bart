@@ -753,10 +753,6 @@ class Patient < OpenMRS
     national_id[0..4] + "-" + national_id[5..8] + "-" + national_id[9..-1] unless national_id.nil?
   end
 
-  def mastercard
-    Mastercard.new(self)
-  end
-
   def birthdate_for_printing
     birthdate = self.birthdate
     if birthdate_estimated
