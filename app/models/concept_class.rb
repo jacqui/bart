@@ -2,7 +2,6 @@ class ConceptClass < OpenMRS
   set_table_name "concept_class"
   has_many :concepts, :foreign_key => :class_id
   belongs_to :user, :foreign_key => :user_id
-  #concept_class_id
   set_primary_key "concept_class_id"
 end
 

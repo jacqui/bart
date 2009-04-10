@@ -1,6 +1,5 @@
 class NotificationTemplate < OpenMRS
   set_table_name "notification_template"
-  #
   set_primary_key ""
 end
 

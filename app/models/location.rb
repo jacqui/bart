@@ -13,8 +13,8 @@ class Location < OpenMRS
   belongs_to :user, :foreign_key => :user_id
 
   def to_fixture_name
-    return super if self.name.blank? || self.name.match(/^\d/)
-    n = self.name.downcase
+    return super if name.blank? || name.match(/^\d/)
+    n = name.downcase
     n = n.gsub(/(\s|-|\/)/, '_')
     n = n.gsub(/__/, '_')
     n = n.gsub(/[^a-z0-9_]/, '')
@@ -26,15 +26,12 @@ class Location < OpenMRS
   end
 
   def self.find_like_name(concept_name)
-    self.find(:all, :conditions => ["name LIKE ?","%#{concept_name}%"])
+    find(:all, :conditions => ["name LIKE ?","%#{concept_name}%"])
   end
 
 
   def self.current_health_center
     return current_location.name
-    #   center_id = GlobalProperty.find_by_property("current_health_center_id").property_value
-    #   center = Location.find(center_id)
-    #   return nil
   end
 
   def self.current_arv_code

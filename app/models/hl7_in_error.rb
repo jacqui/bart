@@ -1,6 +1,5 @@
 class Hl7InError < OpenMRS
   set_table_name "hl7_in_error"
-  #hl7_in_error_id
   set_primary_key "hl7_in_error_id"
 end
 

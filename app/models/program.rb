@@ -6,7 +6,7 @@ class Program < OpenMRS
   has_many :patients, :through => :patient_programs
 
   @@program_hash_by_id = Hash.new
-  self.find(:all).each{|program|
+  find(:all).each{|program|
     @@program_hash_by_id[program.id] = program
   }
 
@@ -18,11 +18,11 @@ class Program < OpenMRS
 
   def self.find_by_name(program_name)
     concept = Concept.find_by_name(program_name)
-    return self.find_by_concept_id(concept.id)
+    return find_by_concept_id(concept.id)
   end
 
   def name
-    self.concept.name
+    concept.name
   end
 
 

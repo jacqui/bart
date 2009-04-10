@@ -10,9 +10,8 @@ class EncounterType < OpenMRS
   belongs_to :user, :foreign_key => :user_id
 
   def url
-    forms = self.forms
-    return "/form/show/" + forms.first.id.to_s unless forms.blank?
-    return "/drug_order/dispense" if self.name == "Give drugs"
-    return "/patient/update_outcome" if self.name == "Update outcome"
+    return "/form/show/" + self.forms.first.id.to_s unless self.forms.blank?
+    return "/drug_order/dispense" if name == "Give drugs"
+    return "/patient/update_outcome" if name == "Update outcome"
   end
 end

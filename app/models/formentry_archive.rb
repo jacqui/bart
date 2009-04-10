@@ -1,7 +1,6 @@
 class FormentryArchive < OpenMRS
   set_table_name "formentry_archive"
   belongs_to :user, :foreign_key => :user_id
-  #formentry_archive_id
   set_primary_key "formentry_archive_id"
 end
 

@@ -39,35 +39,35 @@ class OpenMRS < ActiveRecord::Base
       self.void_reason = reason
       self.voided_by = User.current_user.user_id unless User.current_user.nil?
     end
-end
-
-def voided?
-  self.attributes.has_key?("voided") ? voided : raise("Model does not support voiding")
-end
-
-# cloning when there are composite primary keys
-# will delete all of the key attributes, we don't want that
-def composite_clone
-  if composite?
-    attrs = self.attributes_before_type_cast
-    self.class.new do |record|
-      record.send :instance_variable_set, '@attributes', attrs
-    end
-  else
-    clone
   end
-end
 
-def self.find_like_name(name)
-  self.find(:all, :conditions => ["name LIKE ?","%#{name}%"])
-end
+  def voided?
+    self.attributes.has_key?("voided") ? voided : raise("Model does not support voiding")
+  end
 
-def self.cache_on(*args)
-  self.cattr_accessor :cached
-  self.cached = true
-end
+  # cloning when there are composite primary keys
+  # will delete all of the key attributes, we don't want that
+  def composite_clone
+    if composite?
+      attrs = self.attributes_before_type_cast
+      self.class.new do |record|
+        record.send :instance_variable_set, '@attributes', attrs
+      end
+    else
+      clone
+    end
+  end
 
-def self.cached?
-  self.cached
-end
+  def self.find_like_name(name)
+    self.find(:all, :conditions => ["name LIKE ?","%#{name}%"])
+  end
+
+  def self.cache_on(*args)
+    self.cattr_accessor :cached
+    self.cached = true
+  end
+
+  def self.cached?
+    self.cached
+  end
 end

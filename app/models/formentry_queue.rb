@@ -1,6 +1,5 @@
 class FormentryQueue < OpenMRS
   set_table_name "formentry_queue"
-  #formentry_queue_id
   set_primary_key "formentry_queue_id"
 end
 

@@ -45,14 +45,14 @@ class Observation < OpenMRS
   end
 
   def result_to_string
-    return self.answer_concept.name unless self.value_coded.nil?
-    return self.value_datetime.to_s unless self.value_datetime.nil?
-    return self.value_text unless self.value_text.nil?
-    return self.value_boolean.to_s unless self.value_boolean.nil?
-    if self.concept.name =~ /Location/ and !(self.value_numeric.nil?)
-      return Location.find(self.value_numeric).name unless self.value_numeric.nil?
+    return answer_concept.name unless value_coded.nil?
+    return value_datetime.to_s unless value_datetime.nil?
+    return value_text unless value_text.nil?
+    return value_boolean.to_s unless value_boolean.nil?
+    if concept.name =~ /Location/ and !(value_numeric.nil?)
+      return Location.find(value_numeric).name unless value_numeric.nil?
     else
-      return self.value_numeric.to_s unless self.value_numeric.nil?
+      return value_numeric.to_s unless value_numeric.nil?
     end
   end
 

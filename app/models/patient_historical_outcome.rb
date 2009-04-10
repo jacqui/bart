@@ -9,13 +9,11 @@ class PatientHistoricalOutcome < ActiveRecord::Base
   @@indexing = false
 
   def self.find(*args)
-    #    d = self.index_date
-    #    reindex unless d && d >= Date.today
     super
   end
 
   def self.reset
-    self.reindex
+    reindex
   end
 
   private
@@ -35,7 +33,7 @@ class PatientHistoricalOutcome < ActiveRecord::Base
   end
 
   def self.reindex
-    raise "Sorry I am currently building the historical outcome indexes. Please refresh the page you were trying to load" if self.indexing?
+    raise "Sorry I am currently building the historical outcome indexes. Please refresh the page you were trying to load" if indexing?
 
     @@index_date = Date.today
     p = GlobalProperty.find_or_create_by_property('patient_historical_outcome_index_date')

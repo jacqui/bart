@@ -63,23 +63,23 @@ class User < OpenMRS
   set_primary_key "user_id"
 
   def name
-    self.first_name + " " + self.last_name
+    first_name + " " + last_name
   end
 
   def has_role(name)
-    self.roles.each{|role|
+    roles.each{|role|
       return true if role.role == name
     }
     return false
   end
 
   def has_privilege_by_name(privilege_name)
-    self.has_privilege(Privilege.find_by_privilege(privilege_name))
+    has_privilege(Privilege.find_by_privilege(privilege_name))
   end
 
   def has_privilege(privilege)
     raise "has_privilege method expects privilege object not string, use has_privilege_by_name instead" if privilege.class == String
-    self.roles.each{|role|
+    roles.each{|role|
       role.privileges.each{|priv|
         return true if priv == privilege
       }
@@ -99,21 +99,21 @@ class User < OpenMRS
     prop = activities_property || UserProperty.new
     prop.property = 'Activities'
     prop.property_value = arr.join(',')
-    prop.user_id = self.id
+    prop.user_id = id
     prop.save
   end
 
   def current_programs
     disable_tb_program = GlobalProperty.find_by_property("disable_tb_program")
     current_programs = Array.new
-    return current_programs if self.activities == ['General Reception']
+    return current_programs if activities == ['General Reception']
     current_programs << Program.find_by_name("HIV")
-    current_programs << Program.find_by_name("Tuberculosis (TB)") unless self.activities.grep(/TB/).empty? || (disable_tb_program && disable_tb_program.property_value == "true")
+    current_programs << Program.find_by_name("Tuberculosis (TB)") unless activities.grep(/TB/).empty? || (disable_tb_program && disable_tb_program.property_value == "true")
     return current_programs
   end
 
   def privileges
-    self.roles.collect{|role|
+    roles.collect{|role|
       role.privileges
     }.flatten.uniq
   end
@@ -149,7 +149,7 @@ class User < OpenMRS
   end
 
   def try_to_login
-    User.authenticate(self.username,self.password)
+    User.authenticate(username,password)
   end
 
 
@@ -165,7 +165,7 @@ class User < OpenMRS
   def assign_role(role)
     user_role = UserRole.new
     user_role.role_id = role.id
-    user_role.user_id = self.id
+    user_role.user_id = id
     user_role.save
   end
 

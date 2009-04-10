@@ -5,11 +5,10 @@ class Person < OpenMRS
   has_many :related_from, :class_name => "Relationship", :foreign_key => :relative_id, :dependent => :delete_all
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :user, :foreign_key => :user_id
-  #person_id
   set_primary_key "person_id"
 
   def all_relationships
-    self.related_to << self.related_from
+    related_to << related_from
   end
 end
 
