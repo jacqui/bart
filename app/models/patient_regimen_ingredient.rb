@@ -8,10 +8,11 @@
 # specifications.
 class PatientRegimenIngredient < ActiveRecord::Base
   set_table_name :patient_regimen_ingredients
-  belongs_to :drug_ingredient
-  belongs_to :regimen, :foreign_key => 'regimen_concept_id'
-  belongs_to :patient
+
   belongs_to :encounter
+  belongs_to :drug_ingredient
+  belongs_to :patient
+  belongs_to :regimen, :foreign_key => 'regimen_concept_id'
 end
 =begin
    CREATE VIEW patient_regimen_ingredients (ingredient_concept_id, regimen_concept_id, patient_id, encounter_id, dispensed_date) AS

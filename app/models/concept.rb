@@ -1,7 +1,11 @@
 class Concept < OpenMRS
   set_table_name "concept"
+  set_primary_key "concept_id"
+
   set_fixture_name "name"
+
   validates_uniqueness_of :name
+
   has_many :obs, :foreign_key => :concept_id
   has_many :drugs, :foreign_key => :concept_id do
     def filter(filter_text)
@@ -22,11 +26,10 @@ class Concept < OpenMRS
   has_many :concept_words, :foreign_key => :concept_id
   has_many :concept_names, :foreign_key => :concept_id
   has_many :concept_proposals, :foreign_key => :obs_concept_id
+
   belongs_to :concept_class, :foreign_key => :class_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :concept_datatype, :foreign_key => :datatype_id
-  #concept_id
-  set_primary_key "concept_id"
 
   def self.load_cache
     @@concept_hash_by_name = Hash.new

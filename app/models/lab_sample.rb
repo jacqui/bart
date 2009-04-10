@@ -1,5 +1,6 @@
 class LabSample < OpenMRS
   set_table_name "Lab_Sample"
+
   has_many :lab_parameter, :foreign_key => :sample_id
 
   def self.cd4_trail(patient_identifier)

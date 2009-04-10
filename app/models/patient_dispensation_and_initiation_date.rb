@@ -6,6 +6,7 @@
 # The earliest date for you.
 class PatientDispensationAndInitiationDate < ActiveRecord::Base
   set_table_name :patient_dispensations_and_initiation_dates
+
   belongs_to :patient
 end
 

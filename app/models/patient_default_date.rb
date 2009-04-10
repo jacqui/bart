@@ -27,6 +27,7 @@
 #
 class PatientDefaultDate < ActiveRecord::Base
   set_table_name :patient_default_dates
+
   belongs_to :patient
 end
 

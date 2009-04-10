@@ -1,66 +1,65 @@
 require 'digest/sha1'
 
 class User < OpenMRS
-
-  cattr_accessor :current_user
   set_table_name "users"
+  set_primary_key "user_id"
 
-  validates_presence_of :username, :password, :message =>"Fill in Username"
-  validates_length_of :username, :within => 4..20
-  validates_uniqueness_of :username
-
-  has_many :patient_identifier_types, :foreign_key => :creator
-  has_many :order_types, :foreign_key => :creator
-  has_many :obs, :foreign_key => :voided_by
-  has_many :hl7_sources, :foreign_key => :creator
-  has_many :drugs, :foreign_key => :creator
-  has_many :concept_sources, :foreign_key => :voided_by
-  has_many :concept_classes, :foreign_key => :creator
-  has_many :concepts, :foreign_key => :changed_by
-  has_many :user_properties, :foreign_key => :user_id
-  has_many :form_fields, :foreign_key => :changed_by
-  has_many :patient_identifiers, :foreign_key => :voided_by
-  has_many :field_answers, :foreign_key => :creator
   has_many :concept_answers, :foreign_key => :creator
-  has_many :fields, :foreign_key => :creator
+  has_many :concept_classes, :foreign_key => :creator
+  has_many :concept_datatypes, :foreign_key => :creator
+  has_many :concept_maps, :foreign_key => :creator
+  has_many :concept_names, :foreign_key => :creator
+  has_many :concept_proposals, :foreign_key => :creator
+  has_many :concept_sources, :foreign_key => :voided_by
   has_many :concept_synonyms, :foreign_key => :creator
   has_many :concept_sets, :foreign_key => :creator
-  has_many :relationship_types, :foreign_key => :creator
-  has_many :patient_names, :foreign_key => :voided_by
-  has_many :patients, :foreign_key => :voided_by
-  has_many :orders, :foreign_key => :voided_by
-  has_many :formentry_errors, :foreign_key => :creator
-  has_many :scheduler_task_configs, :foreign_key => :changed_by
-  has_many :notification_alert_recipients, :foreign_key => :user_id
-  has_many :relationships, :foreign_key => :voided_by
-  has_many :formentry_archives, :foreign_key => :creator
+  has_many :concepts, :foreign_key => :changed_by
+  has_many :drugs, :foreign_key => :creator
   has_many :encounter_types, :foreign_key => :creator
-  has_many :concept_names, :foreign_key => :creator
+  has_many :encounters, :foreign_key => :provider_id
+  has_many :field_answers, :foreign_key => :creator
+  has_many :field_types, :foreign_key => :creator
+  has_many :fields, :foreign_key => :creator
+  has_many :form_fields, :foreign_key => :changed_by
+  has_many :formentry_archives, :foreign_key => :creator
+  has_many :formentry_errors, :foreign_key => :creator
+  has_many :forms, :foreign_key => :retired_by
+  has_many :hl7_sources, :foreign_key => :creator
+  has_many :locations, :foreign_key => :creator
   has_many :notes, :foreign_key => :creator
   has_many :notification_alerts, :foreign_key => :changed_by
-  has_many :users, :foreign_key => :voided_by
+  has_many :notification_alert_recipients, :foreign_key => :user_id
+  has_many :order_types, :foreign_key => :creator
+  has_many :orders, :foreign_key => :voided_by
+  has_many :obs, :foreign_key => :voided_by
   has_many :patient_addresses, :foreign_key => :voided_by
-  has_many :forms, :foreign_key => :retired_by
-  has_many :encounters, :foreign_key => :provider_id
-  has_many :reports, :foreign_key => :voided_by
-  has_many :field_types, :foreign_key => :creator
-  has_many :concept_proposals, :foreign_key => :creator
-  has_many :concept_maps, :foreign_key => :creator
-  has_many :concept_datatypes, :foreign_key => :creator
-  has_many :report_objects, :foreign_key => :voided_by
-  has_many :user_roles, :foreign_key => :user_id, :dependent => :delete_all
-  has_many :roles, :through => :user_roles, :foreign_key => :user_id
+  has_many :patient_identifier_types, :foreign_key => :creator
+  has_many :patient_identifiers, :foreign_key => :voided_by
+  has_many :patient_names, :foreign_key => :voided_by
+  has_many :patients, :foreign_key => :voided_by
   has_many :people, :foreign_key => :user_id
-  has_many :locations, :foreign_key => :creator
-  belongs_to :user, :foreign_key => :user_id
+  has_many :relationship_types, :foreign_key => :creator
+  has_many :relationships, :foreign_key => :voided_by
+  has_many :report_objects, :foreign_key => :voided_by
+  has_many :reports, :foreign_key => :voided_by
+  has_many :roles, :through => :user_roles, :foreign_key => :user_id
+  has_many :scheduler_task_configs, :foreign_key => :changed_by
+  has_many :user_properties, :foreign_key => :user_id
+  has_many :users, :foreign_key => :voided_by
+  has_many :user_roles, :foreign_key => :user_id, :dependent => :delete_all
 
   has_one :activities_property,
     :class_name => 'UserProperty',
     :foreign_key => :user_id,
     :conditions => ['property = ?', 'Activities']
 
-  #user_id
-  set_primary_key "user_id"
+  belongs_to :user, :foreign_key => :user_id
+
+  validates_presence_of :username, :password, :message =>"Fill in Username"
+  validates_length_of :username, :within => 4..20
+  validates_uniqueness_of :username
+
+  cattr_accessor :current_user
 
   def name
     first_name + " " + last_name

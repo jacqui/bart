@@ -13,8 +13,9 @@
 class PatientStartDate < ActiveRecord::Base
   set_table_name :patient_start_dates
   set_primary_key :patient_id
-  belongs_to :patient
+
   has_many :observations, :foreign_key => 'patient_id'
+  belongs_to :patient
 end
 =begin
    CREATE VIEW patient_start_dates (patient_id, start_date, age_at_initiation) AS

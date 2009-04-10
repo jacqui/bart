@@ -1,5 +1,6 @@
 class DrugBarcode < OpenMRS
   set_table_name "drug_barcodes"
+
   belongs_to :drug, :foreign_key => :drug_id
 end
 

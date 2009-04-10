@@ -1,7 +1,8 @@
 class FormentryError < OpenMRS
   set_table_name "formentry_error"
-  belongs_to :user, :foreign_key => :user_id
   set_primary_key "formentry_error_id"
+
+  belongs_to :user, :foreign_key => :user_id
 end
 
 

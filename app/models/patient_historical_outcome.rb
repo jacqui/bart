@@ -2,8 +2,9 @@
 # Please see PatientOutcome for more details on how outcomes are calculated.
 class PatientHistoricalOutcome < ActiveRecord::Base
   set_table_name :patient_historical_outcomes
-  belongs_to :patient
+
   belongs_to :concept, :foreign_key => 'outcome_concept_id'
+  belongs_to :patient
 
   @@index_date = nil
   @@indexing = false

@@ -9,6 +9,7 @@
 # <tt>PatientDispensationAndInitiationDate</tt> model).
 class PatientFirstLineRegimenDispensation < ActiveRecord::Base
   set_table_name :patient_first_line_regimen_dispensations
+
   belongs_to :patient
   belongs_to :encounter
 end

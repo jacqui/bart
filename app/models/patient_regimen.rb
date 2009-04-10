@@ -19,9 +19,10 @@
 # it is much faster.
 class PatientRegimen < ActiveRecord::Base
   set_table_name :patient_regimens
-  belongs_to :patient
+
   belongs_to :concept, :foreign_key => 'regimen_concept_id'
   belongs_to :encounter
+  belongs_to :patient
 end
 =begin
    CREATE VIEW patient_regimens (regimen_concept_id, patient_id, encounter_id, dispensed_date) AS

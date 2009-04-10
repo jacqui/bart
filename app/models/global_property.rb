@@ -1,6 +1,5 @@
 class GlobalProperty < OpenMRS
   set_table_name "global_property"
-  set_primary_key "id"
 
   @@global_property_hash_by_property = Hash.new
   @@global_property_hash_by_id = Hash.new

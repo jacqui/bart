@@ -1,10 +1,11 @@
 class Role < OpenMRS
   set_table_name "role"
+  set_primary_key "role_id"
+
+  has_many :privileges, :through => :role_privileges, :foreign_key => :role_id
   has_many :role_roles, :foreign_key => :parent_role_id
   has_many :role_privileges, :foreign_key => :role_id, :dependent => :delete_all
-  has_many :privileges, :through => :role_privileges, :foreign_key => :role_id
   has_many :user_roles, :foreign_key => :role_id
-  set_primary_key "role_id"
 
 end
 

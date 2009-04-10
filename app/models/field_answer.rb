@@ -1,10 +1,11 @@
 require "composite_primary_keys"
 class FieldAnswer < OpenMRS
   set_table_name "field_answer"
+  set_primary_keys :field_id, :answer_id
+
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :field, :foreign_key => :field_id
   belongs_to :user, :foreign_key => :user_id
-  set_primary_keys :field_id, :answer_id
 end
 
 

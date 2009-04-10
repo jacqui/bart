@@ -107,8 +107,6 @@ class Patient < OpenMRS
   end
 
   has_many :people, :foreign_key => :patient_id, :dependent => :delete_all
-  belongs_to :tribe, :foreign_key => :tribe_id
-  belongs_to :user, :foreign_key => :user_id
   has_many :patient_programs, :foreign_key => :patient_id
   has_many :programs, :through => :patient_programs
 
@@ -136,6 +134,9 @@ class Patient < OpenMRS
     end
 
   end
+
+  belongs_to :tribe, :foreign_key => :tribe_id
+  belongs_to :user, :foreign_key => :user_id
 
   @encounter_date = nil
 

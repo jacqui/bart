@@ -1,10 +1,12 @@
 class Order < OpenMRS
   set_table_name "orders"
   set_primary_key "order_id"
-  has_many :observations, :foreign_key => :order_id, :class_name => 'Observation', :dependent => :destroy
+
   has_many :drug_orders, :foreign_key => :order_id, :dependent => :destroy
-  belongs_to :order_type, :foreign_key => :order_type_id
+  has_many :observations, :foreign_key => :order_id, :class_name => 'Observation', :dependent => :destroy
+
   belongs_to :encounter, :foreign_key => :encounter_id
+  belongs_to :order_type, :foreign_key => :order_type_id
   belongs_to :user, :foreign_key => :user_id
 
   def patient

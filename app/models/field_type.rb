@@ -1,7 +1,9 @@
 class FieldType < OpenMRS
   set_table_name "field_type"
   set_primary_key "field_type_id"
+
   has_many :fields, :foreign_key => :field_type
+
   belongs_to :user, :foreign_key => :user_id
 
   class << self

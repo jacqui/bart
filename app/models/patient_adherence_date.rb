@@ -16,6 +16,7 @@
 # optimized.
 class PatientAdherenceDate < ActiveRecord::Base
   set_table_name :patient_adherence_dates
+
   belongs_to :patient
   belongs_to :drug
 

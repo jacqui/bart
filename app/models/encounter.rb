@@ -20,6 +20,7 @@ class Encounter < OpenMRS
   has_many :drug_orders, :through => :orders, :foreign_key => 'order_id'
   has_many :notes, :foreign_key => :encounter_id, :dependent => :destroy
   has_many :concept_proposals, :foreign_key => :encounter_id, :dependent => :destroy
+
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :type, :class_name => "EncounterType", :foreign_key => :encounter_type
   belongs_to :provider, :class_name => "User", :foreign_key => :provider_id

@@ -1,8 +1,9 @@
 class Hl7Source < OpenMRS
   set_table_name "hl7_source"
+  set_primary_key "hl7_source_id"
+
   has_many :hl7_in_queues, :foreign_key => :hl7_source
   belongs_to :user, :foreign_key => :user_id
-  set_primary_key "hl7_source_id"
 end
 
 

@@ -1,9 +1,11 @@
 class Program < OpenMRS
   set_table_name "program"
   set_primary_key "program_id"
-  belongs_to :concept
+
   has_many :patient_programs, :foreign_key => :program_id
   has_many :patients, :through => :patient_programs
+
+  belongs_to :concept
 
   @@program_hash_by_id = Hash.new
   find(:all).each{|program|

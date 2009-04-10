@@ -1,8 +1,9 @@
 require "composite_primary_keys"
 class UserProperty < OpenMRS
   set_table_name "user_property"
-  belongs_to :user, :foreign_key => :user_id
   set_primary_keys :user_id, :property
+
+  belongs_to :user, :foreign_key => :user_id
 end
 
 

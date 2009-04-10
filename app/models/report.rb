@@ -1,7 +1,8 @@
 class Report < OpenMRS
   set_table_name "report"
-  belongs_to :user, :foreign_key => :user_id
   set_primary_key "report_id"
+
+  belongs_to :user, :foreign_key => :user_id
 
   cattr_accessor :cohort_patient_ids
 

@@ -1,7 +1,8 @@
 class ReportObject < OpenMRS
   set_table_name "report_object"
-  belongs_to :user, :foreign_key => :user_id
   set_primary_key "report_object_id"
+
+  belongs_to :user, :foreign_key => :user_id
 end
 
 

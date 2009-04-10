@@ -11,6 +11,7 @@
 #
 class PatientDispensationAndPrescription < ActiveRecord::Base
   set_table_name :patient_dispensations_and_prescriptions
+
   belongs_to :patient
   belongs_to :encounter
   belongs_to :drug

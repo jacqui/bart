@@ -1,7 +1,8 @@
 class Tribe < OpenMRS
   set_table_name "tribe"
-  has_many :patients, :foreign_key => :tribe
   set_primary_key "tribe_id"
+
+  has_many :patients, :foreign_key => :tribe
 end
 
 

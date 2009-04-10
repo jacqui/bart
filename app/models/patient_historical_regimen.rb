@@ -2,9 +2,10 @@
 # Please see PatientRegimen for more details on how regimens are calculated.
 class PatientHistoricalRegimen < ActiveRecord::Base
   set_table_name :patient_historical_regimens
-  belongs_to :patient
+
   belongs_to :concept, :foreign_key => 'regimen_concept_id'
   belongs_to :encounter, :foreign_key =>'encounter_id'
+  belongs_to :patient
 
   @@index_date = nil
   @@indexing = false

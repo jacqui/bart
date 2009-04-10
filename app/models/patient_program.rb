@@ -1,6 +1,7 @@
 class PatientProgram < OpenMRS
   set_table_name "patient_program"
   set_primary_key "patient_program_id"
+
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :program, :foreign_key => :program_id
 end

@@ -1,11 +1,13 @@
 class FormField < OpenMRS
   set_table_name "form_field"
+  set_primary_key "form_field_id"
+
   has_many :form_fields, :foreign_key => :parent_form_field
+
   belongs_to :form_field, :foreign_key => :form_field_id
   belongs_to :field, :foreign_key => :field_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :form, :foreign_key => :form_id
-  set_primary_key "form_field_id"
 end
 
 

@@ -1,8 +1,9 @@
 require "composite_primary_keys"
 class RoleRole < OpenMRS
   set_table_name "role_role"
-  belongs_to :role, :foreign_key => :role_id
   set_primary_keys :parent_role_id, :child_role_id
+
+  belongs_to :role, :foreign_key => :role_id
 end
 
 

@@ -1,8 +1,9 @@
 class OrderType < OpenMRS
   set_table_name "order_type"
+  set_primary_key "order_type_id"
+
   has_many :orders, :foreign_key => :order_type_id
   belongs_to :user, :foreign_key => :user_id
-  set_primary_key "order_type_id"
 
   @@encounter_type_hash_by_name = Hash.new
   find(:all).each{|encounter_type|

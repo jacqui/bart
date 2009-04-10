@@ -1,7 +1,8 @@
 class ConceptNumeric < OpenMRS
   set_table_name "concept_numeric"
-  belongs_to :concept, :foreign_key => :concept_id
   set_primary_key "concept_id"
+
+  belongs_to :concept, :foreign_key => :concept_id
 end
 
 

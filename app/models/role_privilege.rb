@@ -1,9 +1,10 @@
 require "composite_primary_keys"
 class RolePrivilege < OpenMRS
   set_table_name "role_privilege"
-  belongs_to :role, :foreign_key => :role_id
-  belongs_to :privilege, :foreign_key => :privilege_id
   set_primary_keys :privilege_id, :role_id
+
+  belongs_to :privilege, :foreign_key => :privilege_id
+  belongs_to :role, :foreign_key => :role_id
 end
 
 

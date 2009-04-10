@@ -1,16 +1,17 @@
 require 'ajax_scaffold'
 class Location < OpenMRS
-
-  cattr_accessor :current_location
-
-  set_primary_key "location_id"
   set_table_name "location"
+  set_primary_key "location_id"
+
+  has_many :children, :foreign_key => :parent_location_id, :class_name => "Location"
+  has_many :encounters, :foreign_key => :location_id
   has_many :obs, :foreign_key => :location_id
   has_many :patient_identifiers, :foreign_key => :location_id
-  has_many :encounters, :foreign_key => :location_id
+
   belongs_to :parent, :foreign_key => :parent_location_id, :class_name => "Location"
-  has_many :children, :foreign_key => :parent_location_id, :class_name => "Location"
   belongs_to :user, :foreign_key => :user_id
+
+  cattr_accessor :current_location
 
   def to_fixture_name
     return super if name.blank? || name.match(/^\d/)

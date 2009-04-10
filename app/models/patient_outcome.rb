@@ -31,6 +31,7 @@
 # will be two <tt>PatientOutcome</tt> entries with the status Died.
 class PatientOutcome < ActiveRecord::Base
   set_table_name :patient_outcomes
+
   belongs_to :patient
 end
 =begin

@@ -25,8 +25,9 @@
 # simplify later joins.
 class PatientPrescriptionTotal < ActiveRecord::Base
   set_table_name :patient_prescription_totals
-  belongs_to :patient
+
   belongs_to :drug
+  belongs_to :patient
 
   @@index_date = nil
   @@indexing = false

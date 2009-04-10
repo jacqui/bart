@@ -1,6 +1,7 @@
 class PatientAddress < OpenMRS
   set_table_name "patient_address"
   set_primary_key "patient_address_id"
+
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :user, :foreign_key => :user_id
 

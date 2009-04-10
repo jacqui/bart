@@ -1,7 +1,8 @@
 class MimeType < OpenMRS
   set_table_name "mime_type"
-  has_many :complex_obs, :foreign_key => :mime_type_id
   set_primary_key "mime_type_id"
+
+  has_many :complex_obs, :foreign_key => :mime_type_id
 end
 
 

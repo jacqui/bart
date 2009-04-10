@@ -1,15 +1,17 @@
 class Drug < OpenMRS
   set_table_name "drug"
+  set_primary_key "drug_id"
+
   has_many :obs, :foreign_key => :value_drug
   has_many :drug_orders, :foreign_key => :drug_inventory_id
   has_many :barcodes, :class_name => "DrugBarcode",  :foreign_key => :drug_id
+
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
-  set_primary_key "drug_id"
 
   @@drug_hash_by_name = Hash.new
   @@drug_hash_by_id = Hash.new
-  self.find(:all).each{|concept|
+  find(:all).each{|concept|
     @@drug_hash_by_name[concept.name.downcase] = concept
     @@drug_hash_by_id[concept.id] = concept
   }

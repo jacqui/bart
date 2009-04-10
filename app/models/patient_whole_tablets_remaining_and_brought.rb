@@ -1,8 +1,8 @@
 class PatientWholeTabletsRemainingAndBrought < ActiveRecord::Base
   set_table_name :patient_whole_tablets_remaining_and_brought
-  belongs_to :patient
-  belongs_to :drug
 
+  belongs_to :drug
+  belongs_to :patient
 
   @@index_date = nil
   @@indexing = false

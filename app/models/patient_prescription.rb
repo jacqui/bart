@@ -11,9 +11,10 @@
 # more information about time periods see <tt>PrescriptionTimePeriod</tt>.
 class PatientPrescription < ActiveRecord::Base
   set_table_name :patient_prescriptions
+
+  belongs_to :drug
   belongs_to :patient
   belongs_to :encounter
-  belongs_to :drug
 end
 =begin
    CREATE VIEW patient_prescriptions (patient_id, encounter_id, prescription_datetime, drug_id, frequency, dose_amount, time_period, quantity, daily_consumption) AS
