@@ -167,12 +167,12 @@ describe Patient do
 
   it "should find last encounter name by flow" do
     name = patient(:andreas).last_encounter_name_by_flow("2007-03-05".to_date)
-    name.should == "ART Visit"
+    name.should == "Give drugs"
   end
 
   it "should find last encounter by flow" do
     name = patient(:andreas).last_encounter_by_flow("2007-03-05".to_date).name
-    name.should == "ART Visit"
+    name.should == "Give drugs"
   end
 
   it "should find next form" do

@@ -179,13 +179,10 @@ class Patient < OpenMRS
 
   # Intersect the patient's programs and the user's programs to find out what program should be used to determine the next form
   def available_programs(user = User.current_user)
-    #TODO why doesn't the above .program work???
-    programs = PatientProgram.find_all_by_patient_id(id).collect{|pp|pp.program}
-    available_programs = programs & user.current_programs
-
-    available_programs
+    programs & user.current_programs
   end
 
+  # TODO - This should be a named scope
   def current_encounters(date = Date.today)
     encounters.find(:all, :conditions => ["DATE(encounter_datetime) = DATE(?)", date], :order => "date_created DESC")
   end
@@ -203,36 +200,22 @@ class Patient < OpenMRS
   # patient flow regardless of the encounters' datetime
   # The order in which these encounter types are listed is different from that of next encounters
   def last_encounter_name_by_flow(date = Date.today)
-    unless transfer_in_with_letter?
-      encounter_index_to_name = ["HIV Reception", "HIV First visit", "Height/Weight", "HIV Staging", "ART Visit", "Give drugs", "TB Reception", "General Reception"]
-      encounter_name_to_index = {'HIV Reception' => 0,
-        'HIV First visit' => 1,
-        'Height/Weight' => 2,
-        'HIV Staging' => 3,
-        'ART Visit' => 4,
-        'Give Drugs' => 5,
-        'TB Reception' => 6,
-        'General Reception' => 7
-      }
-    else
-      encounter_index_to_name = ["HIV Reception", "HIV First visit", "HIV Staging", "Height/Weight", "ART Visit", "Give drugs", "TB Reception", "General Reception"]
-      encounter_name_to_index = {'HIV Reception' => 0,
-        'HIV First visit' => 1,
-        'HIV Staging' => 2,
-        'Height/Weight' => 3,
-        'ART Visit' => 4,
-        'Give Drugs' => 5,
-        'TB Reception' => 6,
-        'General Reception' => 7
-      }
+    encounter_names = ["HIV Reception", "HIV First visit", "Height/Weight", "HIV Staging", "ART Visit", "Give drugs", "TB Reception", "General Reception"]
+    if transfer_in_with_letter?
+      # Swap Height/Weight and HIV Staging in the array
+      encounter_names.insert(2, encounter_names.delete_at(3))
     end
-    encounter_order_numbers = []
+    indices = (0...encounter_names.size).to_a
+    encounter_numbers = Hash[*encounter_names.zip(indices).flatten]
+
+    in_general_reception = User.current_user.activities.include?('General Reception')
+    max_order_number = 0
     encounters.find_by_date(date).each do |encounter|
-      next if encounter.name == "General Reception" and not User.current_user.activities.include?('General Reception')
-      order_number = encounter_name_to_index[encounter.name]
-      encounter_order_numbers << order_number if order_number
+      next if !in_general_reception && encounter.name == "General Reception"
+      order_number = encounter_numbers[encounter.name] || 0
+      max_order_number = [order_number, max_order_number].max
     end
-    encounter_index_to_name[encounter_order_numbers.max]
+    encounter_names[max_order_number]
   end
 
   # Returns the last patient encounter for a given day according to the
@@ -260,7 +243,7 @@ class Patient < OpenMRS
       next_encounter_type_names << "General Reception" if user_activities.include?('General Reception')
     else
       last_encounter = last_encounter_by_flow(date)
-      next_encounter_type_names = last_encounter.next_encounter_types(available_programs(User.current_user))
+      next_encounter_type_names = last_encounter.next_encounter_types(available_programs)
     end
 
     # if patient is not present - always skip vitals
