@@ -15,6 +15,48 @@ class Observation < OpenMRS
   belongs_to :order, :foreign_key => :order_id
   belongs_to :user, :foreign_key => :user_id
 
+  named_scope :unvoided, :conditions => { :voided => 0 }
+  named_scope :by_concept_id, lambda {|concept_id|
+    { :conditions => { :concept_id => concept_id } }
+  }
+  named_scope :by_concept_name, lambda {|concept_name|
+    {
+      :include => 'concept',
+      :conditions => ["concept.name = ?", concept_name],
+      :order => "obs_datetime ASC"
+    }
+  }
+  named_scope :by_concept_name_with_result, lambda {|concept_name, result|
+    {
+      :include => [:concept, :answer_concept],
+      :conditions => ["concept.name = ? and answer_concepts_obs.name=?", concept_name, result],
+      :order => "obs_datetime ASC"
+    }
+  }
+  named_scope :on_date, lambda {|date|
+    { :conditions => ["DATE(obs_datetime) = ?", date],
+      :order => "obs_datetime"}
+  }
+  named_scope :with_result, lambda {|result|
+    {
+      :include => :answer_concept,
+      :conditions => ["concept.name = ?", result],
+      :order => "obs_datetime DESC"
+    }
+  }
+
+  def self.find_by_concept_id(concept_id)
+    unvoided.by_concept_id(concept_id)
+  end
+  def self.find_by_concept_name(concept_name)
+    unvoided.by_concept_name(concept_name)
+  end
+  def self.find_by_concept_name_on_date(concept_name,date)
+    unvoided.by_concept_name(concept_name).on_date(date)
+  end
+  def self.find_by_concept_name_with_result(concept_name, result)
+    unvoided.by_concept_name_with_result(concept_name, result)
+  end
 
   def to_short_s
     return concept.to_short_s + ":"  + attributes.collect{|name,value|
@@ -29,7 +71,6 @@ class Observation < OpenMRS
         end
     }.compact.join(", ")
   end
-  #obs_id
   #
   # this to_s is meant to be an improvement on result_to_string
   def to_s

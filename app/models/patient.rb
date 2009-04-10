@@ -5,21 +5,11 @@ class Patient < OpenMRS
   set_primary_key "patient_id"
 
   has_many :observations, :foreign_key => :patient_id do
-    def find_by_concept_id(concept_id)
-      find(:all, :conditions => ["voided = 0 and concept_id = ?", concept_id])
-    end
-    def find_by_concept_name(concept_name)
-      find(:all, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id],:order => "obs_datetime ASC")
-    end
     def find_first_by_concept_name(concept_name)
       find(:first, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id], :order => "obs_datetime")
     end
     def find_last_by_concept_name(concept_name)
       find(:first, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id], :order => "obs_datetime DESC")
-    end
-
-    def find_by_concept_name_on_date(concept_name,date)
-      find(:all, :conditions => ["voided = 0 AND concept_id = ? AND DATE(obs_datetime) = ?", Concept.find_by_name(concept_name).id, date], :order => "obs_datetime")
     end
     def find_first_by_concept_name_on_date(concept_name,date)
       find(:first, :conditions => ["voided = 0 and concept_id = ? AND DATE(obs_datetime) = ?", Concept.find_by_name(concept_name).id, date], :order => "obs_datetime")
@@ -33,18 +23,13 @@ class Patient < OpenMRS
     def find_last_by_concept_name_on_or_before_date(concept_name,date)
       find(:first, :conditions => ["voided = 0 and concept_id = ? AND DATE(obs_datetime) <= ?", Concept.find_by_name(concept_name).id, date], :order => "obs_datetime DESC")
     end
-
     def find_last_by_concept_name_before_date(concept_name,date)
       find(:first, :conditions => ["voided = 0 and concept_id = ? AND DATE(obs_datetime) < ?", Concept.find_by_name(concept_name).id, date], :order => "obs_datetime DESC")
     end
-
     def find_last_by_conditions(conditions)
       # Remove voided observations
       conditions[0] = "voided = 0 AND " + conditions[0]
       find(:first, :conditions => conditions, :order => "obs_datetime DESC, date_created DESC")
-    end
-    def find_by_concept_name_with_result(concept_name, value_coded_concept_name)
-      find(:all, :conditions => ["voided = 0 and concept_id = ? AND value_coded = ?", Concept.find_by_name(concept_name).id, Concept.find_by_name(value_coded_concept_name).id], :order => "obs_datetime DESC")
     end
   end
 
