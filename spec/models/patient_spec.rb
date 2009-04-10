@@ -141,13 +141,6 @@ describe Patient do
     result.name.should == "Height/Weight"
   end
 
-  it "should add a patient to a program" do
-    p = Patient.new()
-    p.save
-    p.add_program_by_name("HIV")
-    p.hiv_patient?.should == true
-  end
-
   it "should add a patient to programs" do
     p = Patient.new()
     p.save

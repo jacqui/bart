@@ -168,10 +168,6 @@ class Patient < OpenMRS
       Patient.delete(secondary_patient_id)
   end
 
-  def add_program_by_name(program_name)
-    add_programs([Program.find_by_name(program_name)])
-  end
-
   def add_programs(programs)
     programs.each do |program|
       patient_program = PatientProgram.new
@@ -182,7 +178,7 @@ class Patient < OpenMRS
   end
 
   # Intersect the patient's programs and the user's programs to find out what program should be used to determine the next form
-  def available_programs (user = User.current_user)
+  def available_programs(user = User.current_user)
     #TODO why doesn't the above .program work???
     programs = PatientProgram.find_all_by_patient_id(id).collect{|pp|pp.program}
     available_programs = programs & user.current_programs
