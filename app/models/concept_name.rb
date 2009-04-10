@@ -1,10 +1,9 @@
 require "composite_primary_keys"
 class ConceptName < OpenMRS
   set_table_name "concept_name"
-  set_primary_keys :concept_id, :locale
-
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
+  set_primary_keys :concept_id, :locale
 end
 
 

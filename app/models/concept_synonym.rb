@@ -1,10 +1,9 @@
 require "composite_primary_keys"
 class ConceptSynonym < OpenMRS
   set_table_name "concept_synonym"
-  set_primary_keys :synonym, :concept_id
-
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
+  set_primary_keys :synonym, :concept_id
 end
 
 

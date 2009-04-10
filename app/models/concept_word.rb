@@ -1,8 +1,8 @@
 require "composite_primary_keys"
 class ConceptWord < OpenMRS
   set_table_name "concept_word"
-  set_primary_keys :concept_id, :word, :synonym, :locale
   belongs_to :concept, :foreign_key => :concept_id
+  set_primary_keys :concept_id, :word, :synonym, :locale
 end
 
 
