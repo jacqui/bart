@@ -1,12 +1,12 @@
 class ReportObject < OpenMRS
   set_table_name "report_object"
   belongs_to :user, :foreign_key => :user_id
-#report_object_id
+  #report_object_id
   set_primary_key "report_object_id"
 end
 
 
-### Original SQL Definition for report_object #### 
+### Original SQL Definition for report_object ####
 #   `report_object_id` int(11) NOT NULL auto_increment,
 #   `name` varchar(255) NOT NULL,
 #   `description` varchar(1000) default NULL,

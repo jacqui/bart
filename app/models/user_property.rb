@@ -6,7 +6,7 @@ class UserProperty < OpenMRS
 end
 
 
-### Original SQL Definition for user_property #### 
+### Original SQL Definition for user_property ####
 #   `user_id` int(11) NOT NULL default '0',
 #   `property` varchar(100) NOT NULL default '',
 #   `property_value` varchar(255) NOT NULL default '',

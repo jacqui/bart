@@ -4,12 +4,12 @@ class ConceptProposal < OpenMRS
   belongs_to :concept, :foreign_key => :concept_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :encounter, :foreign_key => :encounter_id
-#concept_proposal_id
+  #concept_proposal_id
   set_primary_key "concept_proposal_id"
 end
 
 
-### Original SQL Definition for concept_proposal #### 
+### Original SQL Definition for concept_proposal ####
 #   `concept_proposal_id` int(11) NOT NULL auto_increment,
 #   `concept_id` int(11) default NULL,
 #   `encounter_id` int(11) default NULL,

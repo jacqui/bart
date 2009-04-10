@@ -6,7 +6,7 @@ class ConceptWord < OpenMRS
 end
 
 
-### Original SQL Definition for concept_word #### 
+### Original SQL Definition for concept_word ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `word` varchar(50) NOT NULL default '',
 #   `synonym` varchar(255) NOT NULL default '',

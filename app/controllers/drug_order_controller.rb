@@ -68,36 +68,36 @@ class DrugOrderController < ApplicationController
         end
         encounter.save
       end
+      end
+
+      use_next_appointment_limit = GlobalProperty.find_by_property("use_next_appointment_limit").property_value rescue "false"
+      use_next_appointment_limit = use_next_appointment_limit == "true" ? true : false
+      Patient.find(session[:patient_id]).next_appointment_date(session[:encounter_datetime].to_date,use_next_appointment_limit)
+      print_and_redirect("/label_printing/print_drug_dispensed", "/patient/menu", "Printing visit summary")
     end
 
-    use_next_appointment_limit = GlobalProperty.find_by_property("use_next_appointment_limit").property_value rescue "false"
-    use_next_appointment_limit = use_next_appointment_limit == "true" ? true : false
-    Patient.find(session[:patient_id]).next_appointment_date(session[:encounter_datetime].to_date,use_next_appointment_limit)
-    print_and_redirect("/label_printing/print_drug_dispensed", "/patient/menu", "Printing visit summary")
-  end
+    def prescribed_dosages
+      #   Ugly hack - pluses don't seem to make it as params, so we put it back in here
+      params[:regimen].sub!(/   /," + ")
 
-  def prescribed_dosages
-#   Ugly hack - pluses don't seem to make it as params, so we put it back in here
-    params[:regimen].sub!(/   /," + ")
+      patient = Patient.find(session[:patient_id])
+      recommended_prescription =  DrugOrder.recommended_art_prescription(patient.current_weight)[params[:regimen]]
 
-    patient = Patient.find(session[:patient_id])
-    recommended_prescription =  DrugOrder.recommended_art_prescription(patient.current_weight)[params[:regimen]]
+      prescription = Array.new
+      recommended_prescription.each do |pres|
+        prescription << Prescription.new(pres.drug.name, pres.frequency, pres.units) if pres.drug
+      end
 
-    prescription = Array.new
-    recommended_prescription.each do |pres|
-      prescription << Prescription.new(pres.drug.name, pres.frequency, pres.units) if pres.drug
-    end
+      prescription_by_time = Hash.new
+      prescription_by_time["Morning"] = prescription.collect{|pres|pres if pres.frequency == "Morning"}.compact
+      prescription_by_time["Evening"] = prescription.collect{|pres|pres if pres.frequency == "Evening"}.compact
 
-    prescription_by_time = Hash.new
-    prescription_by_time["Morning"] = prescription.collect{|pres|pres if pres.frequency == "Morning"}.compact
-    prescription_by_time["Evening"] = prescription.collect{|pres|pres if pres.frequency == "Evening"}.compact
-
-    render :text => <<EOF
+      render :text => <<-EOF
       prescription = #{prescription.to_json};
-      prescriptionByTime = #{prescription_by_time.to_json};
-EOF
-    return
-  end
+        prescriptionByTime = #{prescription_by_time.to_json};
+        EOF
+      return
+    end
 
-end
+  end
 

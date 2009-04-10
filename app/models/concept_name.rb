@@ -7,7 +7,7 @@ class ConceptName < OpenMRS
 end
 
 
-### Original SQL Definition for concept_name #### 
+### Original SQL Definition for concept_name ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `name` varchar(255) NOT NULL default '',
 #   `short_name` varchar(255) default NULL,

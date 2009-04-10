@@ -15,14 +15,14 @@ class StandardEncounterController < ApplicationController
   end
 
   def create_art_visit
-   
+
     patient_id = params[:observations][:weight][:patient_id]
     patient = Patient.find(patient_id)
 
     art_visit_encounter = Encounter.create(params[:encounter])
     #visit_time = art_visit_encounter.encounter_datetime
     visit_time = session[:first_encounter_date]
-    
+
 
     height_weight_encounter = Encounter.new
     height_weight_encounter.provider = User.current_user
@@ -38,8 +38,8 @@ class StandardEncounterController < ApplicationController
         encounter = art_visit_encounter
       end
 
-      other_obs_data = {:encounter_id => encounter.id, 
-                        :obs_datetime => encounter.encounter_datetime}
+      other_obs_data = {:encounter_id => encounter.id,
+        :obs_datetime => encounter.encounter_datetime}
       Observation.create(params[:observations][obs_type].update(other_obs_data)) rescue raise obs_type
     }
 
@@ -93,94 +93,94 @@ class StandardEncounterController < ApplicationController
     }
 
     redirect_to :action => "menu", :patient_id => patient_id
-  end
-
-  def create_art_short_visit
-    patient_id = params[:observations][:weight][:patient_id]
-    patient = Patient.find(patient_id)
-
-    art_visit_encounter = Encounter.create(params[:encounter])
-    visit_time = art_visit_encounter.encounter_datetime
-
-    height_weight_encounter = Encounter.new
-    height_weight_encounter.provider = User.current_user
-    height_weight_encounter.type = EncounterType.find_by_name("Height/Weight")
-    height_weight_encounter.encounter_datetime = visit_time
-    height_weight_encounter.patient_id = patient_id
-    height_weight_encounter.save
-
-    params[:observations].keys.each{|obs_type|
-      if obs_type == "weight"
-        encounter = height_weight_encounter
-      else
-        encounter = art_visit_encounter
       end
 
-      other_obs_data = {:encounter_id => encounter.id, 
-                        :obs_datetime => encounter.encounter_datetime}
-      Observation.create(params[:observations][obs_type].update(other_obs_data)) rescue raise obs_type
-    }
+      def create_art_short_visit
+        patient_id = params[:observations][:weight][:patient_id]
+        patient = Patient.find(patient_id)
 
-    [["Prescribe recommended dosage","Yes"],["Is able to walk unaided","Yes"],["Prescribe Cotrimoxazole (CPT)","Yes"],["Is at work/school","Yes"],["Peripheral neuropathy","No"],["Hepatitis","No"],["Continue treatment at current clinic","Yes"],["Skin rash","No"],["Prescription time period","2 weeks"],["Lactic acidosis","No"],["Lipodystrophy","No"],["ARV regimen","Stavudine Lamivudine + Stavudine Lamivudine Nevirapine"],["Anaemia","No"],["Refer patient to clinician","No"],["Other side effect","No"]].each{|obs_concept_and_answer|
+        art_visit_encounter = Encounter.create(params[:encounter])
+        visit_time = art_visit_encounter.encounter_datetime
 
-      obs_concept, obs_answer_concept = obs_concept_and_answer
-      observation = Observation.new
-      observation.patient_id = patient_id
-      observation.encounter = art_visit_encounter
-      observation.obs_datetime = visit_time
-      observation.concept = Concept.find_by_name(obs_concept)
-      observation.answer_concept = Concept.find_by_name(obs_answer_concept)
-      observation.save!
-    }
+        height_weight_encounter = Encounter.new
+        height_weight_encounter.provider = User.current_user
+        height_weight_encounter.type = EncounterType.find_by_name("Height/Weight")
+        height_weight_encounter.encounter_datetime = visit_time
+        height_weight_encounter.patient_id = patient_id
+        height_weight_encounter.save
 
-    # Need two prescribed dose observations - mornign and evening
-    drug_orders = DrugOrder.recommended_art_prescription(patient.current_weight)["Stavudine Lamivudine Nevirapine"]
-    drug_orders.each{|drug_order|
-      observation = Observation.new
-      observation.patient = patient
-      observation.encounter = art_visit_encounter
-      observation.obs_datetime = visit_time
-      observation.concept = Concept.find_by_name("Prescribed dose")
-      # do logic to determine dose from weight
-      observation.value_drug = drug_order.drug.id
-      observation.value_text = drug_order.frequency
-      observation.value_numeric = drug_order.units
-      observation.save!
-    }
+        params[:observations].keys.each{|obs_type|
+          if obs_type == "weight"
+            encounter = height_weight_encounter
+          else
+            encounter = art_visit_encounter
+          end
 
-    give_drugs = Encounter.new
-    give_drugs.provider = User.current_user
-    give_drugs.type = EncounterType.find_by_name("Give drugs")
-    give_drugs.encounter_datetime = visit_time
-    give_drugs.patient = patient
-    give_drugs.save!
+          other_obs_data = {:encounter_id => encounter.id,
+            :obs_datetime => encounter.encounter_datetime}
+          Observation.create(params[:observations][obs_type].update(other_obs_data)) rescue raise obs_type
+        }
 
-    order_type = OrderType.find_by_name("Give drugs")
+        [["Prescribe recommended dosage","Yes"],["Is able to walk unaided","Yes"],["Prescribe Cotrimoxazole (CPT)","Yes"],["Is at work/school","Yes"],["Peripheral neuropathy","No"],["Hepatitis","No"],["Continue treatment at current clinic","Yes"],["Skin rash","No"],["Prescription time period","2 weeks"],["Lactic acidosis","No"],["Lipodystrophy","No"],["ARV regimen","Stavudine Lamivudine + Stavudine Lamivudine Nevirapine"],["Anaemia","No"],["Refer patient to clinician","No"],["Other side effect","No"]].each{|obs_concept_and_answer|
 
-    drug_orders.each{|drug_order|
-      order = Order.new
-      order.order_type = order_type
-      order.orderer = User.current_user.id
-      order.encounter = give_drugs
-      order.save!
-      drug_order.order = order
-      drug_order.quantity = params[:number_of_months_supplied].to_i * 60
-      drug_order.save!
-    }
+          obs_concept, obs_answer_concept = obs_concept_and_answer
+          observation = Observation.new
+          observation.patient_id = patient_id
+          observation.encounter = art_visit_encounter
+          observation.obs_datetime = visit_time
+          observation.concept = Concept.find_by_name(obs_concept)
+          observation.answer_concept = Concept.find_by_name(obs_answer_concept)
+          observation.save!
+        }
 
-    redirect_to :action => "menu", :patient_id => patient_id
-  end
+        # Need two prescribed dose observations - mornign and evening
+        drug_orders = DrugOrder.recommended_art_prescription(patient.current_weight)["Stavudine Lamivudine Nevirapine"]
+        drug_orders.each{|drug_order|
+          observation = Observation.new
+          observation.patient = patient
+          observation.encounter = art_visit_encounter
+          observation.obs_datetime = visit_time
+          observation.concept = Concept.find_by_name("Prescribed dose")
+          # do logic to determine dose from weight
+          observation.value_drug = drug_order.drug.id
+          observation.value_text = drug_order.frequency
+          observation.value_numeric = drug_order.units
+          observation.save!
+        }
 
-  def menu
-    patient_id = params[:id] unless params[:id].blank?
-    @patient = Patient.find(patient_id) rescue nil
+        give_drugs = Encounter.new
+        give_drugs.provider = User.current_user
+        give_drugs.type = EncounterType.find_by_name("Give drugs")
+        give_drugs.encounter_datetime = visit_time
+        give_drugs.patient = patient
+        give_drugs.save!
 
-    render :layout => false
-  end
+        order_type = OrderType.find_by_name("Give drugs")
 
-  def select_patient
-    patient_id = PatientIdentifier.find_by_identifier(params[:identifier]).patient.id rescue (redirect_to(:action => "menu") and return)
-    redirect_to :action => "new_art_visit", :patient_id => patient_id
-  end
+        drug_orders.each{|drug_order|
+          order = Order.new
+          order.order_type = order_type
+          order.orderer = User.current_user.id
+          order.encounter = give_drugs
+          order.save!
+          drug_order.order = order
+          drug_order.quantity = params[:number_of_months_supplied].to_i * 60
+          drug_order.save!
+        }
 
-end
+        redirect_to :action => "menu", :patient_id => patient_id
+          end
+
+          def menu
+            patient_id = params[:id] unless params[:id].blank?
+            @patient = Patient.find(patient_id) rescue nil
+
+            render :layout => false
+          end
+
+          def select_patient
+            patient_id = PatientIdentifier.find_by_identifier(params[:identifier]).patient.id rescue (redirect_to(:action => "menu") and return)
+            redirect_to :action => "new_art_visit", :patient_id => patient_id
+          end
+
+      end

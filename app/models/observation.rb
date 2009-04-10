@@ -17,30 +17,30 @@ class Observation < OpenMRS
   def to_short_s
     return concept.to_short_s + ":"  + attributes.collect{|name,value|
       next if value.nil? or value == "" or name !~ /value/
-      case name
+        case name
         when "value_coded"
           answer_concept.to_short_s
         when "value_drug"
           drug.to_abbreviation
         else
           value.to_s
-      end
+        end
     }.compact.join(", ")
   end
-#obs_id
-#
-# this to_s is meant to be an improvement on result_to_string
+  #obs_id
+  #
+  # this to_s is meant to be an improvement on result_to_string
   def to_s
     return concept.name + ": "  + attributes.collect{|name,value|
       next if value.nil? or value == "" or name !~ /value/
-      case name
+        case name
         when "value_coded"
           answer_concept.name
         when "value_drug"
           drug.name
         else
           value.to_s
-      end
+        end
     }.compact.join(", ")
   end
 
@@ -59,7 +59,7 @@ class Observation < OpenMRS
 end
 
 
-### Original SQL Definition for obs #### 
+### Original SQL Definition for obs ####
 #   `obs_id` int(11) NOT NULL auto_increment,
 #   `patient_id` int(11) NOT NULL default '0',
 #   `concept_id` int(11) NOT NULL default '0',

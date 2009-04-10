@@ -36,7 +36,7 @@ class GlobalPropertyController < ApplicationController
     @show_wrapper = true if @show_wrapper.nil?
     @sort_sql = GlobalProperty.scaffold_columns_hash[current_sort(params)].sort_sql rescue nil
     @sort_by = @sort_sql.nil? ? "#{GlobalProperty.table_name}.#{GlobalProperty.primary_key} asc" : @sort_sql  + " " + current_sort_direction(params)
-    @paginator, @global_properties = paginate(:global_properties, :order => @sort_by, :per_page => default_per_page)
+      @paginator, @global_properties = paginate(:global_properties, :order => @sort_by, :per_page => default_per_page)
 
     render :action => "component", :layout => false
   end

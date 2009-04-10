@@ -9,8 +9,8 @@ class PatientHistoricalOutcome < ActiveRecord::Base
   @@indexing = false
 
   def self.find(*args)
-#    d = self.index_date
-#    reindex unless d && d >= Date.today
+    #    d = self.index_date
+    #    reindex unless d && d >= Date.today
     super
   end
 
@@ -18,7 +18,7 @@ class PatientHistoricalOutcome < ActiveRecord::Base
     self.reindex
   end
 
-private
+  private
 
   def self.index_date
     return @@index_date if @@index_date && @@index_date >= Date.today
@@ -47,17 +47,17 @@ private
     p.property_value = @@indexing
     p.save
 
-ActiveRecord::Base.connection.execute <<EOF
-DELETE FROM patient_historical_outcomes;
-EOF
+    ActiveRecord::Base.connection.execute <<-EOF
+    DELETE FROM patient_historical_outcomes;
+    EOF
 
-ActiveRecord::Base.connection.execute <<EOF
-INSERT INTO patient_historical_outcomes (patient_id, outcome_concept_id, outcome_date)
-  SELECT patient_id,
-         outcome_concept_id,
-         outcome_date
-  FROM patient_outcomes;
-EOF
+    ActiveRecord::Base.connection.execute <<-EOF
+    INSERT INTO patient_historical_outcomes (patient_id, outcome_concept_id, outcome_date)
+    SELECT patient_id,
+      outcome_concept_id,
+      outcome_date
+    FROM patient_outcomes;
+    EOF
 
   ensure
     @@indexing = false
@@ -70,12 +70,12 @@ EOF
 end
 
 =begin
-CREATE TABLE patient_historical_outcomes (
-  `id` int(11) NOT NULL auto_increment,
-  `patient_id` int(11) NOT NULL,
-  `outcome_concept_id` int(11) NOT NULL,
-  `outcome_date` DATE NOT NULL
-  PRIMARY KEY  (`id`),
-  KEY `patient_id_outcome_concept_id_outcome_date` (`patient_id`, `outcome_concept_id`, `outcome_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+   CREATE TABLE patient_historical_outcomes (
+     `id` int(11) NOT NULL auto_increment,
+     `patient_id` int(11) NOT NULL,
+     `outcome_concept_id` int(11) NOT NULL,
+     `outcome_date` DATE NOT NULL
+     PRIMARY KEY  (`id`),
+       KEY `patient_id_outcome_concept_id_outcome_date` (`patient_id`, `outcome_concept_id`, `outcome_date`)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 =end

@@ -1,9 +1,9 @@
 class EncounterTypeController < ApplicationController
   include AjaxScaffold::Controller
-  
+
   after_filter :clear_flashes
   before_filter :update_params_filter
-  
+
   def update_params_filter
     update_params :default_scaffold_id => "encounter_type", :default_sort => nil, :default_sort_direction => "asc"
   end
@@ -12,17 +12,17 @@ class EncounterTypeController < ApplicationController
   end
   def return_to_main
     # If you have multiple scaffolds on the same view then you will want to change this to
-    # to whatever controller/action shows all the views 
+    # to whatever controller/action shows all the views
     # (ex: redirect_to :controller => 'AdminConsole', :action => 'index')
     redirect_to :action => 'list'
   end
 
   def list
   end
-  
+
   # All posts to change scaffold level variables like sort values or page changes go through this action
   def component_update
-    @show_wrapper = false # don't show the outer wrapper elements if we are just updating an existing scaffold 
+    @show_wrapper = false # don't show the outer wrapper elements if we are just updating an existing scaffold
     if request.xhr?
       # If this is an AJAX request then we just want to delegate to the component to rerender itself
       component
@@ -33,12 +33,12 @@ class EncounterTypeController < ApplicationController
     end
   end
 
-  def component  
+  def component
     @show_wrapper = true if @show_wrapper.nil?
     @sort_sql = EncounterType.scaffold_columns_hash[current_sort(params)].sort_sql rescue nil
     @sort_by = @sort_sql.nil? ? "#{EncounterType.table_name}.#{EncounterType.primary_key} asc" : @sort_sql  + " " + current_sort_direction(params)
-    @paginator, @encounter_types = paginate(:encounter_types, :order => @sort_by, :per_page => default_per_page)
-    
+      @paginator, @encounter_types = paginate(:encounter_types, :order => @sort_by, :per_page => default_per_page)
+
     render :action => "component", :layout => false
   end
 
@@ -52,11 +52,11 @@ class EncounterTypeController < ApplicationController
     if @successful
       @options = { :action => "create" }
       render :partial => "new_edit", :layout => true
-    else 
+    else
       return_to_main
     end
   end
-  
+
   def create
     begin
       @encounter_type = EncounterType.new(params[:encounter_type])
@@ -64,7 +64,7 @@ class EncounterTypeController < ApplicationController
     rescue
       flash[:error], @successful  = $!.to_s, false
     end
-    
+
     return render(:action => 'create.rjs') if request.xhr?
     if @successful
       return_to_main
@@ -81,7 +81,7 @@ class EncounterTypeController < ApplicationController
     rescue
       flash[:error], @successful  = $!.to_s, false
     end
-    
+
     return render(:action => 'edit.rjs') if request.xhr?
 
     if @successful
@@ -89,7 +89,7 @@ class EncounterTypeController < ApplicationController
       render :partial => 'new_edit', :layout => true
     else
       return_to_main
-    end    
+    end
   end
 
   def update
@@ -99,7 +99,7 @@ class EncounterTypeController < ApplicationController
     rescue
       flash[:error], @successful  = $!.to_s, false
     end
-    
+
     return render(:action => 'update.rjs') if request.xhr?
 
     if @successful
@@ -116,18 +116,18 @@ class EncounterTypeController < ApplicationController
     rescue
       flash[:error], @successful  = $!.to_s, false
     end
-    
+
     return render(:action => 'destroy.rjs') if request.xhr?
-    
+
     # Javascript disabled fallback
     return_to_main
   end
-  
+
   def cancel
     @successful = true
-    
+
     return render(:action => 'cancel.rjs') if request.xhr?
-    
+
     return_to_main
   end
 end

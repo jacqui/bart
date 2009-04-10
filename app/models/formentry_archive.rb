@@ -1,12 +1,12 @@
 class FormentryArchive < OpenMRS
   set_table_name "formentry_archive"
   belongs_to :user, :foreign_key => :user_id
-#formentry_archive_id
+  #formentry_archive_id
   set_primary_key "formentry_archive_id"
 end
 
 
-### Original SQL Definition for formentry_archive #### 
+### Original SQL Definition for formentry_archive ####
 #   `formentry_archive_id` int(11) NOT NULL auto_increment,
 #   `form_data` mediumtext NOT NULL,
 #   `date_created` datetime NOT NULL default '0000-00-00 00:00:00',

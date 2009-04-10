@@ -6,12 +6,12 @@ class Note < OpenMRS
   belongs_to :note, :foreign_key => :note_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :encounter, :foreign_key => :encounter_id
-#note_id
+  #note_id
   set_primary_key "note_id"
 end
 
 
-### Original SQL Definition for note #### 
+### Original SQL Definition for note ####
 #   `note_id` int(11) NOT NULL default '0',
 #   `note_type` varchar(50) default NULL,
 #   `patient_id` int(11) default NULL,

@@ -36,11 +36,11 @@ class LocationController < ApplicationController
     @show_wrapper = true if @show_wrapper.nil?
     @sort_sql = Location.scaffold_columns_hash[current_sort(params)].sort_sql rescue nil
     @sort_by = @sort_sql.nil? ? "#{Location.table_name}.#{Location.primary_key} asc" : @sort_sql  + " " + current_sort_direction(params)
-    if params[:name]
-      @paginator, @locations = paginate(:locations, :conditions => ["name LIKE ?", "%"+params[:name]+"%"],:order => @sort_by, :per_page => default_per_page)
-    else
-      @paginator, @locations = paginate(:locations, :order => @sort_by, :per_page => default_per_page)
-    end
+      if params[:name]
+        @paginator, @locations = paginate(:locations, :conditions => ["name LIKE ?", "%"+params[:name]+"%"],:order => @sort_by, :per_page => default_per_page)
+      else
+        @paginator, @locations = paginate(:locations, :order => @sort_by, :per_page => default_per_page)
+      end
 
     render :action => "component", :layout => false
   end

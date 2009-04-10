@@ -3,18 +3,18 @@ class PrescriptionFrequency < ActiveRecord::Base
 end
 
 =begin
-DROP TABLE IF EXISTS prescription_frequencies;
-CREATE TABLE prescription_frequencies (
-  `id` int(11) NOT NULL auto_increment,
-  `frequency` varchar(255) NOT NULL,
-  `frequency_days` int(11) NOT NULL,
-  PRIMARY KEY  (`id`),
-  KEY `frequency_index` (`frequency`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+   DROP TABLE IF EXISTS prescription_frequencies;
+   CREATE TABLE prescription_frequencies (
+     `id` int(11) NOT NULL auto_increment,
+     `frequency` varchar(255) NOT NULL,
+     `frequency_days` int(11) NOT NULL,
+     PRIMARY KEY  (`id`),
+     KEY `frequency_index` (`frequency`)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO prescription_frequencies (frequency, frequency_days) VALUES
-  ('Once', 1),
-  ('Morning', 1),
-  ('Evening', 1),
-  ('Weekly', 7);
+   INSERT INTO prescription_frequencies (frequency, frequency_days) VALUES
+   ('Once', 1),
+     ('Morning', 1),
+     ('Evening', 1),
+     ('Weekly', 7);
 =end

@@ -13,7 +13,7 @@ class Order < OpenMRS
 end
 
 
-### Original SQL Definition for orders #### 
+### Original SQL Definition for orders ####
 #   `order_id` int(11) NOT NULL auto_increment,
 #   `order_type_id` int(11) NOT NULL default '0',
 #   `concept_id` int(11) NOT NULL default '0',

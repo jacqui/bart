@@ -5,12 +5,12 @@ class FormField < OpenMRS
   belongs_to :field, :foreign_key => :field_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :form, :foreign_key => :form_id
-#form_field_id
+  #form_field_id
   set_primary_key "form_field_id"
 end
 
 
-### Original SQL Definition for form_field #### 
+### Original SQL Definition for form_field ####
 #   `form_field_id` int(11) NOT NULL auto_increment,
 #   `form_id` int(11) NOT NULL default '0',
 #   `field_id` int(11) NOT NULL default '0',

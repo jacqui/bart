@@ -1,12 +1,12 @@
 class ConceptNumeric < OpenMRS
   set_table_name "concept_numeric"
   belongs_to :concept, :foreign_key => :concept_id
-#concept_id
+  #concept_id
   set_primary_key "concept_id"
 end
 
 
-### Original SQL Definition for concept_numeric #### 
+### Original SQL Definition for concept_numeric ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `hi_absolute` double default NULL,
 #   `hi_critical` double default NULL,

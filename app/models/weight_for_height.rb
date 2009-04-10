@@ -6,8 +6,8 @@ class WeightForHeight < ActiveRecord::Base
     height_for_weight = Hash.new
     self.find(:all).each{|hwt|
       height_for_weight[hwt.supine_cm] = hwt.median_weight_height
-    }   
-    return height_for_weight 
+    }
+    return height_for_weight
   end
 
   def self.significant(patient_height)
@@ -15,6 +15,6 @@ class WeightForHeight < ActiveRecord::Base
     siginificant_height = patient_height.round
     siginificant_height = patient_height.round - 0.5 if decimal_digit >= 0.5
     return siginificant_height
-  end	
+  end
 
 end

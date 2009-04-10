@@ -7,7 +7,7 @@ class ConceptSynonym < OpenMRS
 end
 
 
-### Original SQL Definition for concept_synonym #### 
+### Original SQL Definition for concept_synonym ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `synonym` varchar(255) NOT NULL default '',
 #   `locale` varchar(255) default NULL,

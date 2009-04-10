@@ -1,5 +1,5 @@
 class DrugBarcodeController < ApplicationController
-  
+
   def index
     redirect_to :action => "scan"
   end
@@ -11,7 +11,7 @@ class DrugBarcodeController < ApplicationController
     end
 
     @all_barcodes = DrugBarcode.find(:all)
-# drugs requiring barcodes
+    # drugs requiring barcodes
     @drugs_needing_barcodes = Drug.find(:all).collect{|drug| drug if drug.barcodes.empty? }.compact
     render :layout => false
   end
@@ -27,11 +27,11 @@ class DrugBarcodeController < ApplicationController
     redirect_to :action => "scan", :barcode => drug_barcode.barcode
   end
 
-	def to_drug_id
-		barcode = params[:id]
-		drug_barcode = DrugBarcode.find_by_barcode(barcode)
-		render:text => drug_barcode.drug_id and return unless drug_barcode.nil?
-		render:text => ""
-	end
+  def to_drug_id
+    barcode = params[:id]
+    drug_barcode = DrugBarcode.find_by_barcode(barcode)
+    render:text => drug_barcode.drug_id and return unless drug_barcode.nil?
+    render:text => ""
+  end
 
 end

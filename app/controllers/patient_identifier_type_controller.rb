@@ -40,11 +40,11 @@ class PatientIdentifierTypeController < ApplicationController
     @sort_sql = PatientIdentifierType.scaffold_columns_hash[current_sort(params)].sort_sql rescue nil
     @sort_by = @sort_sql.nil? ? "#{PatientIdentifierType.table_name}.#{PatientIdentifierType.primary_key} asc" : @sort_sql  + " " + current_sort_direction(params)
 
-    if params[:name]
-       @paginator, @patient_identifier_types = paginate(:patient_identifier_types, :conditions => ["name LIKE ?", "%"+params[:name]+"%"], :order => @sort_by, :per_page => default_per_page)
-    else
+      if params[:name]
+        @paginator, @patient_identifier_types = paginate(:patient_identifier_types, :conditions => ["name LIKE ?", "%"+params[:name]+"%"], :order => @sort_by, :per_page => default_per_page)
+      else
         @paginator, @patient_identifier_types = paginate(:patient_identifier_types, :order => @sort_by, :per_page => default_per_page)
-    end
+      end
 
     render :action => "component", :layout => false
   end

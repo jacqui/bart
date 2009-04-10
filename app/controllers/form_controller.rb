@@ -6,7 +6,7 @@ class FormController < ApplicationController
 
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
   verify :method => :post, :only => [ :destroy, :create, :update ],
-         :redirect_to => { :action => :list }
+    :redirect_to => { :action => :list }
 
   def list
     #@form_pages, @forms = paginate :forms, :per_page => 25
@@ -15,27 +15,27 @@ class FormController < ApplicationController
 
   def show
     redirect_to(:controller => "patient", :action => "menu") and return if session[:patient_id].nil?
-    
+
     @form = Form.find(params[:id])
     @patient = Patient.find(session[:patient_id])
-    
+
     if @form.uri == 'art_adult_staging' and @patient.child?
       redirect_to(:action => "show", :id => Form.find_by_uri('art_child_staging').id) and return
     end
-    
+
     @attributes = Hash.new("")
 
     @ordered_fields = @form.form_fields.sort_by{|form_field| form_field.field_number}.collect{|form_field| form_field.field}
 
-#    session[:encounter] = new_encounter_from_form(@form)
+    #    session[:encounter] = new_encounter_from_form(@form)
 
     @needs_date_picker = true if @form.fields.collect{|f|f.type.name}.include?("date")
     @adult_or_peds = (@patient.child? ? "peds" : "adult")
 
-#    if @form.uri == "art_followup"
-#      patient = Patient.find(session[:patient_id])
-#    end
-    
+    #    if @form.uri == "art_followup"
+    #      patient = Patient.find(session[:patient_id])
+    #    end
+
     if(File.exist?(RAILS_ROOT + "/app/views/form/#{@form.uri}.rhtml"))
       action = @form.uri
     else
@@ -47,80 +47,80 @@ class FormController < ApplicationController
 
 
     render :action => action, :layout => "touchscreen_form" and return
-  end
+end
 
-  def new
-    @form = Form.new
-  end
+def new
+  @form = Form.new
+end
 
-  def create
-    @form = Form.new(params[:form])
-    if @form.save
-      flash[:notice] = 'Form was successfully created.'
-      redirect_to :action => 'list'
-    else
-      render :action => 'new'
-    end
-  end
-
-  def edit
-    @form = Form.find(params[:id])
-  end
-
-  def order
-    params[:list].each_with_index { |id,idx| FormField.update(id, :field_number => idx+1) }
-    render :text => 'Updated sort order'
-  end
-
-  def add_field
-    form_field = FormField.new
-    form_field.form_id = params[:id]
-    form_field.field_id = params[:field_id]
-    form_field.field_number = FormField.find(:first, :order => "field_number DESC").field_number + 1
-    form_field.save
-    flash[:notice] = 'Added: ' + form_field.field.name
-    redirect_to :action => 'edit', :id => params[:id]
-  end
-  
-  def remove_field
-    flash["error"] = "Could not remove" unless FormField.find(params[:form_field_id]).destroy
-    redirect_to :action => 'edit', :id => params[:id]
-  end
-
-  def update
-    @form = Form.find(params[:id])
-    if @form.update_attributes(params[:form])
-      flash[:notice] = 'Form was successfully updated.'
-      redirect_to :action => 'index'
-    else
-      render :action => 'edit'
-    end
-  end
-
-  def destroy
-    Form.find(params[:id]).destroy
+def create
+  @form = Form.new(params[:form])
+  if @form.save
+    flash[:notice] = 'Form was successfully created.'
     redirect_to :action => 'list'
+  else
+    render :action => 'new'
   end
+end
+
+def edit
+  @form = Form.find(params[:id])
+end
+
+def order
+  params[:list].each_with_index { |id,idx| FormField.update(id, :field_number => idx+1) }
+  render :text => 'Updated sort order'
+end
+
+def add_field
+  form_field = FormField.new
+  form_field.form_id = params[:id]
+  form_field.field_id = params[:field_id]
+  form_field.field_number = FormField.find(:first, :order => "field_number DESC").field_number + 1
+  form_field.save
+  flash[:notice] = 'Added: ' + form_field.field.name
+  redirect_to :action => 'edit', :id => params[:id]
+end
+
+def remove_field
+  flash["error"] = "Could not remove" unless FormField.find(params[:form_field_id]).destroy
+  redirect_to :action => 'edit', :id => params[:id]
+end
+
+def update
+  @form = Form.find(params[:id])
+  if @form.update_attributes(params[:form])
+    flash[:notice] = 'Form was successfully updated.'
+    redirect_to :action => 'index'
+  else
+    render :action => 'edit'
+  end
+end
+
+def destroy
+  Form.find(params[:id]).destroy
+  redirect_to :action => 'list'
+end
 
 
-  def formulations
-    @generic = params[:generic] 
-    @concept_ids = Concept.find(:all,:conditions =>["name IN (?)",@generic.split(";")]).collect{|concept|concept.concept_id} rescue nil
-    render :text => "" and return if @concept_ids.blank?
-    @drugs = Drug.find(:all,:conditions => ["concept_id IN (?)", @concept_ids])
-    render :text => "<li>" + @drugs.map{|drug| drug.name }.join("</li><li>") + "</li>"
-  end
-  
-  def frequencies
-    doses = ["None","1 ","2 ","3 ","1/4","1/3","1/2","3/4","1 1/4 ","1 1/2","1 3/4"]
-    render :text => "<li>" + doses.join("</li><li>") + "</li>"
-  end
+def formulations
+  @generic = params[:generic]
+  @concept_ids = Concept.find(:all,:conditions =>["name IN (?)",@generic.split(";")]).collect{|concept|concept.concept_id} rescue nil
+  render :text => "" and return if @concept_ids.blank?
+  @drugs = Drug.find(:all,:conditions => ["concept_id IN (?)", @concept_ids])
+  render :text => "<li>" + @drugs.map{|drug| drug.name }.join("</li><li>") + "</li>"
+end
 
-  def selected_regimens
-    drugs = Drug.find(:all,:conditions =>["name IN (?)",params[:regimen].split(";")])
-    concepts = ""
-    drugs.each{|drug|concepts+=Concept.find(drug.concept_id).name + ";"}
-    render :text => concepts.split(";").join(";")
-  end
+def frequencies
+  doses = ["None","1 ","2 ","3 ","1/4","1/3","1/2","3/4","1 1/4 ","1 1/2","1 3/4"]
+  render :text => "<li>" + doses.join("</li><li>") + "</li>"
+end
+
+def selected_regimens
+  drugs = Drug.find(:all,:conditions =>["name IN (?)",params[:regimen].split(";")])
+  concepts = ""
+  drugs.each{|drug|concepts+=Concept.find(drug.concept_id).name + ";"}
+  render :text => concepts.split(";").join(";")
+end
 
 end

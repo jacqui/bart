@@ -2,7 +2,7 @@ class OrderType < OpenMRS
   set_table_name "order_type"
   has_many :orders, :foreign_key => :order_type_id
   belongs_to :user, :foreign_key => :user_id
-#order_type_id
+  #order_type_id
   set_primary_key "order_type_id"
 
   @@encounter_type_hash_by_name = Hash.new
@@ -16,7 +16,7 @@ class OrderType < OpenMRS
 end
 
 
-### Original SQL Definition for order_type #### 
+### Original SQL Definition for order_type ####
 #   `order_type_id` int(11) NOT NULL auto_increment,
 #   `name` varchar(255) NOT NULL default '',
 #   `description` varchar(255) NOT NULL default '',

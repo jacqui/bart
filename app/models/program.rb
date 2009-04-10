@@ -10,7 +10,7 @@ class Program < OpenMRS
     @@program_hash_by_id[program.id] = program
   }
 
-# Use the cache hash to get these fast
+  # Use the cache hash to get these fast
   def self.find_from_ids(args, options)
     super if args.length > 1 and return
     return @@program_hash_by_id[args.first] || super

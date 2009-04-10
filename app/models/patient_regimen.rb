@@ -1,9 +1,9 @@
-# PatientRegimen allows you to quickly look up every regimen dispensation 
+# PatientRegimen allows you to quickly look up every regimen dispensation
 # for a given patient. It does this by determining if all of the regimen
 # specific ingredients have been 'satisfied' by the ingredients that were
 # actually dispensed. For example if a patient is given Stavudine, Lamivudine,
 # and Nevirapine then they will have been given all of the ingredients that
-# are contained in the first line regimen. 
+# are contained in the first line regimen.
 #
 # A patient may be given additional ingredients (for example, CPT) and are still
 # considered to be on the regimen. It is possible (though not likely) for a
@@ -24,12 +24,12 @@ class PatientRegimen < ActiveRecord::Base
   belongs_to :encounter
 end
 =begin
-CREATE VIEW patient_regimens (regimen_concept_id, patient_id, encounter_id, dispensed_date) AS
-  SELECT patient_regimen_ingredients.regimen_concept_id as regiment_concept_id,
-         patient_regimen_ingredients.patient_id as patient_id,
-         patient_regimen_ingredients.encounter_id as encounter_id, 
-         patient_regimen_ingredients.dispensed_date as dispensed_date        
-  FROM patient_regimen_ingredients
-  GROUP BY patient_regimen_ingredients.encounter_id, patient_regimen_ingredients.regimen_concept_id
-  HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = patient_regimen_ingredients.regimen_concept_id); 
+   CREATE VIEW patient_regimens (regimen_concept_id, patient_id, encounter_id, dispensed_date) AS
+   SELECT patient_regimen_ingredients.regimen_concept_id as regiment_concept_id,
+     patient_regimen_ingredients.patient_id as patient_id,
+     patient_regimen_ingredients.encounter_id as encounter_id,
+     patient_regimen_ingredients.dispensed_date as dispensed_date
+   FROM patient_regimen_ingredients
+   GROUP BY patient_regimen_ingredients.encounter_id, patient_regimen_ingredients.regimen_concept_id
+   HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = patient_regimen_ingredients.regimen_concept_id);
 =end

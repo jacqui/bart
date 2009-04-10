@@ -7,7 +7,7 @@ class UserRole < OpenMRS
 end
 
 
-### Original SQL Definition for user_role #### 
+### Original SQL Definition for user_role ####
 #   `user_id` int(11) NOT NULL default '0',
 #   `role_id` Int(11) NOT NULL ,
 #   PRIMARY KEY  (`role_id`,`user_id`),

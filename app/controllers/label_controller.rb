@@ -17,35 +17,35 @@ class LabelController < ApplicationController
           :font_horizontal_multiplier => 2,
           :font_vertical_multiplier => 2,
           :font_reverse => true },
-        { :name => 'National Identifier',
-          :text => '#{national_id_and_birthdate}#{sex}',
-          :sample => 'P1234-5678-9012 ??/???/1974 (F)',
-          :left => 40,
-          :top => 80,
-          :rotation => 0,
-          :font_size => 2,
-          :font_horizontal_multiplier => 2,
-          :font_vertical_multiplier => 2,
-          :font_reverse => false },
-        { :name => 'Address',
-          :text => '#{address}',
-          :sample => 'Ngolowindo - Lilongwe',
-          :left => 40,
-          :top => 130,
-          :rotation => 0,
-          :font_size => 2,
-          :font_horizontal_multiplier => 2,
-          :font_vertical_multiplier => 2,
-          :font_reverse => false }           
-      ],
-      :lines => [],            
+          { :name => 'National Identifier',
+            :text => '#{national_id_and_birthdate}#{sex}',
+            :sample => 'P1234-5678-9012 ??/???/1974 (F)',
+            :left => 40,
+            :top => 80,
+            :rotation => 0,
+            :font_size => 2,
+            :font_horizontal_multiplier => 2,
+            :font_vertical_multiplier => 2,
+            :font_reverse => false },
+            { :name => 'Address',
+              :text => '#{address}',
+              :sample => 'Ngolowindo - Lilongwe',
+              :left => 40,
+              :top => 130,
+              :rotation => 0,
+              :font_size => 2,
+              :font_horizontal_multiplier => 2,
+              :font_vertical_multiplier => 2,
+              :font_reverse => false }
+    ],
+      :lines => [],
       :frames => [
         { :left => 2,
           :top => 2,
           :width => 770,
           :height => 323,
           :frame_width => 1 }
-       ],
+    ],
       :barcodes => [
         { :data => 'P123456789012',
           :format => 1,
@@ -55,17 +55,17 @@ class LabelController < ApplicationController
           :wide_bar_width => 15,
           :height => 120,
           :rotation => 0,
-          :human_readable => false } 
-      ]            
+          :human_readable => false }
+    ]
     }
-    render :layout => false  
+    render :layout => false
   end
-  
+
   def create
     @label = ZebraPrinter::Label.from_template(params)
     render :text => @label.print(1), :layout => false, :content_type => "text/plain"
   end
-  
+
   def designer
     @label = ZebraPrinter::Label.from_template(params)
     render :template => "label/designer", :content_type => "image/svg+xml", :layout => false
@@ -77,7 +77,7 @@ class LabelController < ApplicationController
   end
 
   def test
-#  id = params[:id]
+    #  id = params[:id]
     id = "foo.lbl"
     send_data("yoyoyo", :type=> "application/label; charset=utf-8", :stream=> false, :filename=>"#{id}", :disposition => 'inline')
   end
@@ -105,11 +105,11 @@ class LabelController < ApplicationController
 
     send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
   end
-  
+
   def transfer_out_label
     patient=Patient.find(params[:id])
     label_commands = patient.transfer_out_label(session[:encounter_datetime].to_s.to_date,params[:location])
-    send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline") 
+    send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
 end

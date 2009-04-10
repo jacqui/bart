@@ -5,7 +5,7 @@ class Person < OpenMRS
   has_many :related_from, :class_name => "Relationship", :foreign_key => :relative_id, :dependent => :delete_all
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :user, :foreign_key => :user_id
-#person_id
+  #person_id
   set_primary_key "person_id"
 
   def all_relationships
@@ -14,7 +14,7 @@ class Person < OpenMRS
 end
 
 
-### Original SQL Definition for person #### 
+### Original SQL Definition for person ####
 #   `person_id` int(11) NOT NULL auto_increment,
 #   `patient_id` int(11) default NULL,
 #   `user_id` int(11) default NULL,

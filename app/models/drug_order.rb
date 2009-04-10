@@ -50,9 +50,9 @@ class DrugOrder < OpenMRS
   end
 
   def daily_consumption
-#   Need daily consumption
-#   Number of units given
-#   Days since drugs given
+    #   Need daily consumption
+    #   Number of units given
+    #   Days since drugs given
     daily_consumption = 0
     # Look for the presciption that corresponds with the current drug_order
     self.prescriptions.each{|prescription|
@@ -90,74 +90,74 @@ class DrugOrder < OpenMRS
     @@drug_orders_hash ||= Hash.new
     return @@drug_orders_hash[drug_orders_hash_key] if @@drug_orders_hash.has_key?(drug_orders_hash_key)
     regimens = Concept.find_by_sql("
-SELECT parent_concept.*
-FROM (
-  SELECT regimen_ingredient.concept_id
-  FROM drug_order
-  INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-  INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
-  INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
-  INNER JOIN concept as regimen_concept ON regimen_ingredient.concept_id = regimen_concept.concept_id
-  WHERE drug_order_id IN (#{drug_orders_hash_key}) AND regimen_concept.class_id = 18
-  GROUP BY regimen_ingredient.concept_id, regimen_ingredient.ingredient_id) as satisfied_ingredients
-INNER JOIN concept_set AS parent_concept_set ON parent_concept_set.concept_id = satisfied_ingredients.concept_id
-INNER JOIN concept AS parent_concept ON parent_concept.concept_id = parent_concept_set.concept_set
-GROUP BY satisfied_ingredients.concept_id
-HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = satisfied_ingredients.concept_id)")
-    @@drug_orders_hash[drug_orders_hash_key] = nil if regimens.blank?
-    return nil if regimens.blank?
-    @@drug_orders_hash[drug_orders_hash_key] = regimens.first
-    regimens.first
+                                   SELECT parent_concept.*
+                                     FROM (
+                                       SELECT regimen_ingredient.concept_id
+                                   FROM drug_order
+                                   INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                                   INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
+                                   INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
+                                   INNER JOIN concept as regimen_concept ON regimen_ingredient.concept_id = regimen_concept.concept_id
+                                   WHERE drug_order_id IN (#{drug_orders_hash_key}) AND regimen_concept.class_id = 18
+                                   GROUP BY regimen_ingredient.concept_id, regimen_ingredient.ingredient_id) as satisfied_ingredients
+                                   INNER JOIN concept_set AS parent_concept_set ON parent_concept_set.concept_id = satisfied_ingredients.concept_id
+                                   INNER JOIN concept AS parent_concept ON parent_concept.concept_id = parent_concept_set.concept_set
+                                   GROUP BY satisfied_ingredients.concept_id
+                                   HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = satisfied_ingredients.concept_id)")
+                                   @@drug_orders_hash[drug_orders_hash_key] = nil if regimens.blank?
+                                   return nil if regimens.blank?
+                                   @@drug_orders_hash[drug_orders_hash_key] = regimens.first
+                                   regimens.first
 =begin
-    regimens = Concept.find_by_sql("
-      SELECT parent_concept.*
-      FROM drug_order
-      INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-      INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
-      INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
-      INNER JOIN concept as regimen_concept ON regimen_ingredient.concept_id = regimen_concept.concept_id
-      INNER JOIN concept_set AS parent_concept_set ON parent_concept_set.concept_id = regimen_concept.concept_id
-      INNER JOIN concept AS parent_concept ON parent_concept.concept_id = parent_concept_set.concept_set
-      WHERE drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')}) AND regimen_concept.class_id = 18
-      GROUP BY regimen_ingredient.concept_id
-      HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = regimen_ingredient.concept_id)")
-    return nil if regimens.blank?
-    regimens.first
+   regimens = Concept.find_by_sql("
+                                  SELECT parent_concept.*
+                                    FROM drug_order
+                                  INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                                  INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
+                                  INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
+                                  INNER JOIN concept as regimen_concept ON regimen_ingredient.concept_id = regimen_concept.concept_id
+                                  INNER JOIN concept_set AS parent_concept_set ON parent_concept_set.concept_id = regimen_concept.concept_id
+                                  INNER JOIN concept AS parent_concept ON parent_concept.concept_id = parent_concept_set.concept_set
+                                  WHERE drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')}) AND regimen_concept.class_id = 18
+                                  GROUP BY regimen_ingredient.concept_id
+                                  HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = regimen_ingredient.concept_id)")
+                                  return nil if regimens.blank?
+                                  regimens.first
 =end
 =begin
-    regimens = Concept.find_by_sql("
-      SELECT parent_concept.*
-      FROM concept AS regimen_concept
-      INNER JOIN concept_set ON concept_set.concept_id = regimen_concept.concept_id
-      INNER JOIN concept AS parent_concept ON parent_concept.concept_id = concept_set.concept_set
-      WHERE regimen_concept.class_id = 18 AND NOT EXISTS (
-        SELECT *
-        FROM drug_ingredient AS regimen_ingredient
-        INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
-        INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-        LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
-        WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NULL)")
-    return nil if regimens.blank?
-    regimens.first
+   regimens = Concept.find_by_sql("
+                                  SELECT parent_concept.*
+                                    FROM concept AS regimen_concept
+                                  INNER JOIN concept_set ON concept_set.concept_id = regimen_concept.concept_id
+                                  INNER JOIN concept AS parent_concept ON parent_concept.concept_id = concept_set.concept_set
+                                  WHERE regimen_concept.class_id = 18 AND NOT EXISTS (
+                                    SELECT *
+                                    FROM drug_ingredient AS regimen_ingredient
+                                    INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
+                                    INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                                    LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
+                                    WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NULL)")
+                                    return nil if regimens.blank?
+                                    regimens.first
 =end
 =begin
-    #first, first alt, second line
-    combined_drug_orders = drug_orders.collect{|drug_order|drug_order.drug.name}.join("+")
-    if combined_drug_orders.match(/Stavudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Nevirapine/)
-      return Concept.find_by_name("ARV First line regimen")
-    elsif combined_drug_orders.match(/Zidovudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Nevirapine/)
-      return Concept.find_by_name("ARV First line regimen alternatives")
-    elsif combined_drug_orders.match(/Stavudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Efavirenz/)
-      return Concept.find_by_name("ARV First line regimen alternatives")
-    elsif combined_drug_orders.match(/Zidovudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Tenofovir/) && combined_drug_orders.match(/Lopinavir/) && combined_drug_orders.match(/Ritonavir/)
-      return Concept.find_by_name("ARV Second line regimen")
-    elsif combined_drug_orders.match(/Didanosine/) && combined_drug_orders.match(/Abacavir/) && combined_drug_orders.match(/Lopinavir/) && combined_drug_orders.match(/Ritonavir/)
-      return Concept.find_by_name("ARV Second line regimen")
-    else
-      # Unknown drug regimen
-      # TODO: Fix this!
-      return nil
-    end
+   #first, first alt, second line
+   combined_drug_orders = drug_orders.collect{|drug_order|drug_order.drug.name}.join("+")
+   if combined_drug_orders.match(/Stavudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Nevirapine/)
+     return Concept.find_by_name("ARV First line regimen")
+   elsif combined_drug_orders.match(/Zidovudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Nevirapine/)
+     return Concept.find_by_name("ARV First line regimen alternatives")
+   elsif combined_drug_orders.match(/Stavudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Efavirenz/)
+     return Concept.find_by_name("ARV First line regimen alternatives")
+   elsif combined_drug_orders.match(/Zidovudine/) && combined_drug_orders.match(/Lamivudine/) && combined_drug_orders.match(/Tenofovir/) && combined_drug_orders.match(/Lopinavir/) && combined_drug_orders.match(/Ritonavir/)
+     return Concept.find_by_name("ARV Second line regimen")
+   elsif combined_drug_orders.match(/Didanosine/) && combined_drug_orders.match(/Abacavir/) && combined_drug_orders.match(/Lopinavir/) && combined_drug_orders.match(/Ritonavir/)
+     return Concept.find_by_name("ARV Second line regimen")
+   else
+     # Unknown drug regimen
+     # TODO: Fix this!
+     return nil
+   end
 =end
   end
 
@@ -166,54 +166,54 @@ HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.co
   # This could return an array of regimens (in case a prescription matches multiple regimens)
   def self.drug_orders_to_sub_regimens(drug_orders)
     Concept.find_by_sql("
-      SELECT *
-      FROM concept
-      WHERE concept.concept_id IN (
-        SELECT DISTINCT regimen_concept.concept_id as regimen
-        FROM drug_ingredient AS regimen_ingredient
-        INNER JOIN concept AS regimen_concept ON regimen_concept.class_id = 18
-        INNER JOIN drug_order ON drug_order.drug_order_id IN (3,1)
-        INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-        LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
-        WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NOT NULL
-        GROUP BY dispensed_ingredient.ingredient_id
-      )")
+                        SELECT *
+                          FROM concept
+                        WHERE concept.concept_id IN (
+                          SELECT DISTINCT regimen_concept.concept_id as regimen
+                          FROM drug_ingredient AS regimen_ingredient
+                          INNER JOIN concept AS regimen_concept ON regimen_concept.class_id = 18
+                          INNER JOIN drug_order ON drug_order.drug_order_id IN (3,1)
+                          INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                          LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
+                          WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NOT NULL
+                          GROUP BY dispensed_ingredient.ingredient_id
+                        )")
 =begin
 
-    # 18 is the concept_class for regimens
-    Concept.find_by_sql("
-      SELECT regimen.*
-      FROM drug_order
-      INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-      INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
-      INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
-      INNER JOIN concept as regimen ON regimen_ingredient.concept_id = regimen.concept_id
-      WHERE drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')}) AND regimen.class_id = 18
-      GROUP BY regimen_ingredient.concept_id
-      HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = regimen_ingredient.concept_id)")
+   # 18 is the concept_class for regimens
+   Concept.find_by_sql("
+                       SELECT regimen.*
+                         FROM drug_order
+                       INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                       INNER JOIN drug_ingredient as dispensed_ingredient ON drug.concept_id = dispensed_ingredient.concept_id
+                       INNER JOIN drug_ingredient as regimen_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id
+                       INNER JOIN concept as regimen ON regimen_ingredient.concept_id = regimen.concept_id
+                       WHERE drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')}) AND regimen.class_id = 18
+                       GROUP BY regimen_ingredient.concept_id
+                       HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.concept_id = regimen_ingredient.concept_id)")
 =end
 =begin
-    Concept.find_by_sql("
-      SELECT *
-      FROM concept
-      WHERE class_id = 18 AND concept_id NOT IN (
-        SELECT regimen_ingredient.concept_id
-        FROM drug_ingredient AS regimen_ingredient
-        INNER JOIN concept as regimen ON regimen_ingredient.concept_id = regimen.concept_id
-        INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
-        INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-        LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
+   Concept.find_by_sql("
+                       SELECT *
+                         FROM concept
+                       WHERE class_id = 18 AND concept_id NOT IN (
+                         SELECT regimen_ingredient.concept_id
+                         FROM drug_ingredient AS regimen_ingredient
+                         INNER JOIN concept as regimen ON regimen_ingredient.concept_id = regimen.concept_id
+                         INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
+                         INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                         LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
 
-    Concept.find_by_sql("
-      SELECT *
-      FROM concept AS regimen_concept
-      WHERE class_id = 18 AND NOT EXISTS (
-        SELECT *
-        FROM drug_ingredient AS regimen_ingredient
-        INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
-        INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
-        LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
-        WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NULL)")
+                         Concept.find_by_sql("
+                                             SELECT *
+                                               FROM concept AS regimen_concept
+                                             WHERE class_id = 18 AND NOT EXISTS (
+                                               SELECT *
+                                               FROM drug_ingredient AS regimen_ingredient
+                                               INNER JOIN drug_order ON drug_order.drug_order_id IN (#{drug_orders.map{|d|d.drug_order_id}.join(',')})
+                                               INNER JOIN drug ON drug_order.drug_inventory_id = drug.drug_id
+                                               LEFT JOIN drug_ingredient as dispensed_ingredient ON regimen_ingredient.ingredient_id = dispensed_ingredient.ingredient_id AND drug.concept_id = dispensed_ingredient.concept_id
+                                               WHERE regimen_ingredient.concept_id = regimen_concept.concept_id AND dispensed_ingredient.ingredient_id IS NULL)")
 =end
   end
 
@@ -232,9 +232,9 @@ HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.co
       next if order.drug.name == "Insecticide Treated Net"
       prescriptions = order.prescription_encounter.to_prescriptions rescue []
       prescriptions.each{|p| orders << "#{order.drug.name},#{p.frequency},#{p.dose_amount.to_f},#{drug_total[order.drug.name]}" }
-      orders << "#{order.drug.name},no prescription,__,#{drug_total[order.drug.name]}" if prescriptions.blank?
+        orders << "#{order.drug.name},no prescription,__,#{drug_total[order.drug.name]}" if prescriptions.blank?
     }
-    return orders.uniq
+      return orders.uniq
   end
 
   def prescription_encounter
@@ -269,13 +269,13 @@ HAVING count(*) = (SELECT count(*) FROM drug_ingredient WHERE drug_ingredient.co
     pills_remaining.map{|x|amount_remaining+=x.value_numeric}
     amount_remaining = amount_remaining.round
     puts "#{amount_remaining}.... #{expected_amount_remaining}"
-    puts "#{amount_given_last_time}.... #{expected_amount_remaining}..................#{previous_art_visit_date}"
-    number_missed = amount_remaining - expected_amount_remaining
+      puts "#{amount_given_last_time}.... #{expected_amount_remaining}..................#{previous_art_visit_date}"
+      number_missed = amount_remaining - expected_amount_remaining
     return (100*(amount_given_last_time - amount_remaining) / (amount_given_last_time - expected_amount_remaining)).round
   end
-def after_save
-  self.order.encounter.patient.reset_regimens
-end
+  def after_save
+    self.order.encounter.patient.reset_regimens
+  end
 
 end
 

@@ -8,7 +8,7 @@ class LoginController < ApplicationController
 
   # GETs should be safe (see http://www.w3.org/2001/tag/doc/whenToUseGet.html)
   verify :method => :post, :only => [ :destroy, :create, :update ],
-         :redirect_to => { :action => :list }
+    :redirect_to => { :action => :list }
 
   def list
     @user_pages, @users = paginate :users, :per_page => 10
@@ -59,6 +59,6 @@ class LoginController < ApplicationController
   end
 
   def test1
-   render_text Digest::SHA1.hexdigest("testing") 
+    render_text Digest::SHA1.hexdigest("testing")
   end
 end

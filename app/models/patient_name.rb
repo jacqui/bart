@@ -2,12 +2,12 @@ class PatientName < OpenMRS
   set_table_name "patient_name"
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :user, :foreign_key => :user_id
-#patient_name_id
+  #patient_name_id
   set_primary_key "patient_name_id"
 end
 
 
-### Original SQL Definition for patient_name #### 
+### Original SQL Definition for patient_name ####
 #   `patient_name_id` int(11) NOT NULL auto_increment,
 #   `preferred` tinyint(1) NOT NULL default '0',
 #   `patient_id` int(11) NOT NULL default '0',

@@ -2,12 +2,12 @@ class ConceptSource < OpenMRS
   set_table_name "concept_source"
   has_many :concept_maps, :foreign_key => :source
   belongs_to :user, :foreign_key => :user_id
-#concept_source_id
+  #concept_source_id
   set_primary_key "concept_source_id"
 end
 
 
-### Original SQL Definition for concept_source #### 
+### Original SQL Definition for concept_source ####
 #   `concept_source_id` int(11) NOT NULL auto_increment,
 #   `name` varchar(50) NOT NULL default '',
 #   `description` text NOT NULL,

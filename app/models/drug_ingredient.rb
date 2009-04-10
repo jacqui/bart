@@ -11,7 +11,7 @@ class DrugIngredient < OpenMRS
 end
 
 
-### Original SQL Definition for drug_ingredient #### 
+### Original SQL Definition for drug_ingredient ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `ingredient_id` int(11) NOT NULL default '0',
 #   PRIMARY KEY  (`ingredient_id`,`concept_id`),

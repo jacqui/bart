@@ -7,7 +7,7 @@ class NotificationAlertRecipient < OpenMRS
 end
 
 
-### Original SQL Definition for notification_alert_recipient #### 
+### Original SQL Definition for notification_alert_recipient ####
 #   `alert_id` int(11) NOT NULL,
 #   `user_id` int(11) NOT NULL,
 #   `alert_read` int(1) NOT NULL default '0',
@@ -17,4 +17,4 @@ end
 #   KEY `id_of_alert` (`alert_id`),
 #   CONSTRAINT `id_of_alert` FOREIGN KEY (`alert_id`) REFERENCES `notification_alert` (`alert_id`),
 #   CONSTRAINT `alert_read_by_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
-#  
+#

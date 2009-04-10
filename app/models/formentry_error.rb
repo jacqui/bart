@@ -1,12 +1,12 @@
 class FormentryError < OpenMRS
   set_table_name "formentry_error"
   belongs_to :user, :foreign_key => :user_id
-#formentry_error_id
+  #formentry_error_id
   set_primary_key "formentry_error_id"
 end
 
 
-### Original SQL Definition for formentry_error #### 
+### Original SQL Definition for formentry_error ####
 #   `formentry_error_id` int(11) NOT NULL auto_increment,
 #   `form_data` mediumtext NOT NULL,
 #   `error` varchar(255) NOT NULL default '',

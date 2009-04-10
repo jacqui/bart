@@ -55,11 +55,11 @@ class User < OpenMRS
   belongs_to :user, :foreign_key => :user_id
 
   has_one :activities_property,
-          :class_name => 'UserProperty',
-          :foreign_key => :user_id,
-          :conditions => ['property = ?', 'Activities']
+    :class_name => 'UserProperty',
+    :foreign_key => :user_id,
+    :conditions => ['property = ?', 'Activities']
 
-#user_id
+  #user_id
   set_primary_key "user_id"
 
   def name

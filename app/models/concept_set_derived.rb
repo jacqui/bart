@@ -5,7 +5,7 @@ class ConceptSetDerived < OpenMRS
 end
 
 
-### Original SQL Definition for concept_set_derived #### 
+### Original SQL Definition for concept_set_derived ####
 #   `concept_id` int(11) NOT NULL default '0',
 #   `concept_set` int(11) NOT NULL default '0',
 #   `sort_weight` double default NULL,

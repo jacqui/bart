@@ -8,7 +8,7 @@ class FieldAnswer < OpenMRS
 end
 
 
-### Original SQL Definition for field_answer #### 
+### Original SQL Definition for field_answer ####
 #   `field_id` int(11) NOT NULL default '0',
 #   `answer_id` int(11) NOT NULL default '0',
 #   `creator` int(11) NOT NULL default '0',

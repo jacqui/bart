@@ -25,7 +25,7 @@ class Concept < OpenMRS
   belongs_to :concept_class, :foreign_key => :class_id
   belongs_to :user, :foreign_key => :user_id
   belongs_to :concept_datatype, :foreign_key => :datatype_id
-#concept_id
+  #concept_id
   set_primary_key "concept_id"
 
   def self.load_cache
@@ -36,15 +36,15 @@ class Concept < OpenMRS
       @@concept_hash_by_id[concept.id] = concept
     }
   end
-  
+
   self.load_cache
 
-# Use the cache hash to get these fast
+  # Use the cache hash to get these fast
   def self.find_from_ids(args, options)
     super if args.length > 1 and return
     return @@concept_hash_by_id[args.first] || super
   end
-  
+
   def self.find_by_name(concept_name)
     return @@concept_hash_by_name[concept_name.to_s.downcase] || super
   end
@@ -52,11 +52,11 @@ class Concept < OpenMRS
   def to_s
     self.name
   end
-  
-  def to_short_s    
+
+  def to_short_s
     self.short_name.blank? ? self.name : self.short_name
   end
-  
+
   def add_concept_answer(concept_name)
     concept_answer_option = Concept.find_by_name(concept_name)
     unless self.answer_options.include?(concept_answer_option)
@@ -66,23 +66,23 @@ class Concept < OpenMRS
       concept_answer.save
     end
   end
-  
+
   def add_yes_no_concept_answers
     self.add_concept_answer("Yes")
     self.add_concept_answer("No")
     true
   end
-  
+
   def add_yes_no_unknown_concept_answers
     self.add_yes_no_concept_answers
     self.add_concept_answer("Unknown")
   end
-  
+
   def add_yes_no_unknown_not_applicable_concept_answers
     self.add_yes_no_unknown_concept_answers
     self.add_concept_answer("Not applicable")
   end
-  
+
   def self.create_start_substitute_switch_answers_for_regimen_type
     start = Concept.find_by_name("Start")
     substitute = Concept.find_by_name("Substitute")
@@ -101,42 +101,42 @@ class Concept < OpenMRS
   def create_field
     field = Field.new
     case self.concept_datatype.name
-      when "Coded"
-        field.type = FieldType.find_by_name("select")
-      when "Number"
-        field.type = FieldType.find_by_name("number")
-      when "Date"
-        field.type = FieldType.find_by_name("date")
-      else
-        field.type = FieldType.find_by_name("alpha")
+    when "Coded"
+      field.type = FieldType.find_by_name("select")
+    when "Number"
+      field.type = FieldType.find_by_name("number")
+    when "Date"
+      field.type = FieldType.find_by_name("date")
+    else
+      field.type = FieldType.find_by_name("alpha")
     end
     field.name = self.name
     field.concept = self
     field.save
   end
-  
+
   def humanize
-#    c = self
-#    c.name = c.name.humanize.gsub(/who/i,"WHO").gsub(/(^| )art/i,"#{$1}ART").gsub(/cd4/i, "CD4").gsub(/cpt/i,"CPT").gsub(/arv/i,"ARV").gsub(/hiv/i,"HIV").gsub(/pcp/i,"PCP"); c.save
+    #    c = self
+    #    c.name = c.name.humanize.gsub(/who/i,"WHO").gsub(/(^| )art/i,"#{$1}ART").gsub(/cd4/i, "CD4").gsub(/cpt/i,"CPT").gsub(/arv/i,"ARV").gsub(/hiv/i,"HIV").gsub(/pcp/i,"PCP"); c.save
   end
-  
+
 =begin
-  def to_fixture_name
-    raise "No name for concept #{id}" unless self.name || self.short_name
-    n = self.name.downcase if self.name
-    n ||= self.short_name.downcase
-    n = n.gsub(/(\s|-|\/)/, '_')
-    n = n.gsub(/__/, '_')
-    n = n.gsub(/[^a-z0-9_]/, '') 
-    n
-  end
-=end  
+   def to_fixture_name
+     raise "No name for concept #{id}" unless self.name || self.short_name
+     n = self.name.downcase if self.name
+     n ||= self.short_name.downcase
+     n = n.gsub(/(\s|-|\/)/, '_')
+     n = n.gsub(/__/, '_')
+     n = n.gsub(/[^a-z0-9_]/, '')
+     n
+   end
+=end
 
 end
 
 
 
-### Original SQL Definition for concept #### 
+### Original SQL Definition for concept ####
 #   `concept_id` int(11) NOT NULL auto_increment,
 #   `retired` tinyint(1) NOT NULL default '0',
 #   `name` varchar(255) NOT NULL default '',

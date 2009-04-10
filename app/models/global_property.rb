@@ -16,11 +16,11 @@ class GlobalProperty < OpenMRS
 
   def to_s
     return "#{property}: #{property_value}"
-  end  
+  end
 end
 
 
-### Original SQL Definition for global_property #### 
+### Original SQL Definition for global_property ####
 #  `id` int(11) NOT NULL auto_increment,
 #  `property` varchar(255) default NULL,
 #  `property_value` varchar(255) default NULL,

@@ -16,7 +16,7 @@ class PatientAddress < OpenMRS
 end
 
 
-### Original SQL Definition for patient_address #### 
+### Original SQL Definition for patient_address ####
 #   `patient_address_id` int(11) NOT NULL auto_increment,
 #   `patient_id` int(11) NOT NULL default '0',
 #   `preferred` tinyint(1) NOT NULL default '0',

@@ -2,12 +2,12 @@ class ConceptClass < OpenMRS
   set_table_name "concept_class"
   has_many :concepts, :foreign_key => :class_id
   belongs_to :user, :foreign_key => :user_id
-#concept_class_id
+  #concept_class_id
   set_primary_key "concept_class_id"
 end
 
 
-### Original SQL Definition for concept_class #### 
+### Original SQL Definition for concept_class ####
 #   `concept_class_id` int(11) NOT NULL auto_increment,
 #   `name` varchar(255) NOT NULL default '',
 #   `description` varchar(255) NOT NULL default '',

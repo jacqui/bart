@@ -7,7 +7,7 @@ class RolePrivilege < OpenMRS
 end
 
 
-### Original SQL Definition for role_privilege #### 
+### Original SQL Definition for role_privilege ####
 #   `role_id` int(11) NOT NULL ,
 #   `privilege_id` int(11) NOT NULL ,
 #   PRIMARY KEY  (`privilege_id`,`role_id`),

@@ -6,7 +6,7 @@ class RoleRole < OpenMRS
 end
 
 
-### Original SQL Definition for role_role #### 
+### Original SQL Definition for role_role ####
 #   `parent_role_id` int(11) NOT NULL ,
 #   `child_role_id` int(11) NOT NULL ,
 #   PRIMARY KEY  (`parent_role_id`,`child_role_id`),
