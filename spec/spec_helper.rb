@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'spec'
 require 'spec/rails'
+require 'spec/factories'
 
 # Make sure the tmp directory exists, for PDF specs
 system "mkdir #{RAILS_ROOT}/tmp" unless File.exists? "#{RAILS_ROOT}/tmp"
