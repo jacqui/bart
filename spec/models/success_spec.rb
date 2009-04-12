@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + '/../spec_helper'
-require File.dirname(__FILE__) + '/encounter_spec'
 
 require 'net/smtp'
 
