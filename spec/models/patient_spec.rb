@@ -8,7 +8,6 @@ describe Patient do
 
   before(:each) do
     Patient.send(:class_variable_set, :@@date_started_art, Hash.new)
-    Date.stubs(:today).returns(@today)
   end
 
   sample({
@@ -278,30 +277,36 @@ describe Patient do
     patient(:andreas).name_with_id.should == "Andreas Jahn P1700-0000-0013"
   end
 
-  it "should show patient's age" do
-    # Andreas is 38 years, 8.6 months old
-    patient(:andreas).age(@today).should == 38
-  end
+  context do
+    before do
+      Date.stubs(:today).returns(@today)
+    end
 
-  it "should show patient's age in months" do
-    # 1970-07-22 to 2009-04-10 is 14142 days, 464.6 months
-    patient(:andreas).age_in_months(@today).should == 464
-  end
+    it "should show patient's age" do
+      # Andreas is 38 years, 8.6 months old
+      patient(:andreas).age.should == 38
+    end
 
-  it "should show if patient is a child or not" do
-    patient(:andreas).child?.should == false
-  end
+    it "should show patient's age in months" do
+      # 1970-07-22 to 2009-04-10 is 14142 days, 464.6 months
+      patient(:andreas).age_in_months.should == 464
+    end
 
-  it "should show if patient is not a child" do
-    patient(:andreas).adult_or_child.should == "adult"
-  end
+    it "should show if patient is a child or not" do
+      patient(:andreas).child?.should == false
+    end
 
-  it "should estimate patients' age" do
-    patient = Patient.new
-    patient.save
-    patient.age = 26
-    patient.age.should == 26
-    patient.age("2009-07-20".to_date).should == 26
+    it "should show if patient is not a child" do
+      patient(:andreas).adult_or_child.should == "adult"
+    end
+
+    it "should estimate patients' age" do
+      patient = Patient.new
+      patient.save
+      patient.age = 26
+      patient.age.should == 26
+      patient.age("2009-07-20".to_date).should == 26
+    end
   end
 
   it "should show age at initiation" do
