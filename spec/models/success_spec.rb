@@ -112,7 +112,7 @@ describe Success, "Tasks" do
   end
 
   it "should check for recent encounters and not alert when there is one" do
-    encounter = create_sample(Encounter, :encounter_datetime => 1.minute.ago)
+    encounter = Factory(:encounter, :encounter_datetime => 1.minute.ago)
     Success.should_have_recent_encounter
     Success.sent_alert.should == false
   end
