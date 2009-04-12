@@ -3,12 +3,6 @@ class Encounter < OpenMRS
   set_primary_key "encounter_id"
 
   has_many :observations, :foreign_key => :encounter_id, :dependent => :destroy do
-    def find_by_concept_id(concept_id)
-      find(:all, :conditions => ["voided = 0 and concept_id = ?", concept_id])
-    end
-    def find_by_concept_name(concept_name)
-      find(:all, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id])
-    end
     def find_first_by_concept_name(concept_name)
       find(:first, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id], :order => "obs_datetime")
     end
@@ -16,10 +10,10 @@ class Encounter < OpenMRS
       find(:first, :conditions => ["voided = 0 and concept_id = ?", Concept.find_by_name(concept_name).id], :order => "obs_datetime DESC")
     end
   end
-  has_many :orders, :foreign_key => :encounter_id, :dependent => :destroy
+  has_many :concept_proposals, :foreign_key => :encounter_id, :dependent => :destroy
   has_many :drug_orders, :through => :orders, :foreign_key => 'order_id'
   has_many :notes, :foreign_key => :encounter_id, :dependent => :destroy
-  has_many :concept_proposals, :foreign_key => :encounter_id, :dependent => :destroy
+  has_many :orders, :foreign_key => :encounter_id, :dependent => :destroy
 
   belongs_to :patient, :foreign_key => :patient_id
   belongs_to :type, :class_name => "EncounterType", :foreign_key => :encounter_type
@@ -142,7 +136,6 @@ class Encounter < OpenMRS
   end
 
   def next_encounter_types(programs)
-
     next_encounter_types = Array.new
     programs.each{|program|
       case program.name
