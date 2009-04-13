@@ -8,7 +8,7 @@ class WeightHeight
   @@min_weight_female = Hash.new
   @@max_weight_female = Hash.new
 
-  File.open(File.join(RAILS_ROOT, "app/models/wtht_rangecheck.csv"), File::RDONLY).readlines.each{|line|
+  File.open(File.join(RAILS_ROOT, "db/data/csv/wtht_rangecheck.csv"), File::RDONLY).readlines.each{|line|
     (age_in_months,sex,low_height,high_height,low_weight,high_weight) = line.split(",").collect{|field|field.to_f}
     age_in_months = age_in_months.to_i
     if sex == 0

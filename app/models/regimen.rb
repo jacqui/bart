@@ -9,7 +9,7 @@ class Regimen
   def self.all_combinations
     if @@all_combinations.blank?
       last_regimen = Array.new
-      File.open(File.join(RAILS_ROOT, "app/models/all_drug_order_combinations.csv"), File::RDONLY).readlines[1..-1].each{|line|
+      File.open(File.join(RAILS_ROOT, "db/data/csv/all_drug_order_combinations.csv"), File::RDONLY).readlines[1..-1].each{|line|
         data_row = line.chomp.split(",").collect{|text|text.gsub(/"/,"")} # "
         result = last_regimen
         data_row.each_with_index{|data,index|
