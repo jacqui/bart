@@ -175,6 +175,8 @@ class Patient < OpenMRS
 
   def last_encounter(date = Date.today)
     # Find the last significant (non-barcode scan) encounter
+    # TODO - Can this be the same list returned by encounter_types ?
+    # For some reason, this list does not include 'Give drugs'
     encounter_types = ["HIV Reception", "Height/Weight", "HIV First visit", "ART Visit", "TB Reception", "HIV Staging", "General Reception"]
     condition = encounter_types.collect do |encounter_type|
       "encounter_type = #{EncounterType.find_by_name(encounter_type).id}"
@@ -182,35 +184,54 @@ class Patient < OpenMRS
       encounters.find_last_by_conditions(["DATE(encounter_datetime) = DATE(?) AND (#{condition})", date])
   end
 
+  # TODO - This has a lot in common with Encounter#next_encounter_types,
+  # and something can definitely be factored out here.
+  def encounter_types
+    types = ["HIV Reception", "HIV First visit", "Height/Weight", "HIV Staging", "ART Visit", "Give drugs", "TB Reception", "General Reception"].dup
+    if transfer_in_with_letter?
+      # Swap Height/Weight and HIV Staging in the array
+      types.insert(2, types.delete_at(3))
+    end
+    types
+  end
+
+  # Returns a Hash with +encounter_types+ as keys, and their
+  # positions in the patient workflow as values.
+  def encounter_flow
+    indices = (0...encounter_types.size).to_a
+    # Make a Hash with names as keys and indices as values
+    Hash[*encounter_types.zip(indices).flatten]
+  end
+
   # Returns the name of the last patient encounter for a given day according to the
   # patient flow regardless of the encounters' datetime
   # The order in which these encounter types are listed is different from that of next encounters
   def last_encounter_name_by_flow(date = Date.today)
-    encounter_names = ["HIV Reception", "HIV First visit", "Height/Weight", "HIV Staging", "ART Visit", "Give drugs", "TB Reception", "General Reception"]
-    if transfer_in_with_letter?
-      # Swap Height/Weight and HIV Staging in the array
-      encounter_names.insert(2, encounter_names.delete_at(3))
-    end
-    indices = (0...encounter_names.size).to_a
-    encounter_numbers = Hash[*encounter_names.zip(indices).flatten]
+    encounter_names = encounter_types
+    general_reception = encounter_names.last
+    in_general_reception = User.current_user.activities.include?(general_reception)
 
-    in_general_reception = User.current_user.activities.include?('General Reception')
     max_order_number = 0
     encounters.find_by_date(date).each do |encounter|
-      next if !in_general_reception && encounter.name == "General Reception"
-      order_number = encounter_numbers[encounter.name] || 0
-      max_order_number = [order_number, max_order_number].max
+      if encounter.name == general_reception
+        return encounter.name if in_general_reception
+      else
+        order_number = encounter_flow[encounter.name] || 0
+        max_order_number = [order_number, max_order_number].max
+      end
     end
     encounter_names[max_order_number]
   end
 
   # Returns the last patient encounter for a given day according to the
   # patient flow regardless of the encounters' datetime
+  # TODO - This is where the 'name_by_flow' logic should go, and name_by_flow should simply be last_encounter_by_flow.name
   def last_encounter_by_flow(date = Date.today)
     last_encounter_name = last_encounter_name_by_flow(date)
     last_encounter_type = EncounterType.find_by_name(last_encounter_name)
-    return encounters.find_last_by_conditions("encounter_type = #{last_encounter_type.id}") if last_encounter_type
-      return nil
+    if last_encounter_type
+      encounters.find_last_by_conditions("encounter_type = #{last_encounter_type.id}")
+    end
   end
 
   def next_forms(date = Date.today, outcome = nil)

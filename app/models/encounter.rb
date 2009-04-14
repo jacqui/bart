@@ -151,7 +151,7 @@ class Encounter < OpenMRS
           encounter_mappings["HIV Staging"] = ["ART Visit"]
         end
         # If they are a transfer in with a letter we want the receptionist to copy the staging info using the retrospective staging form
-        if patient.transfer_in_with_letter? == true
+        if patient.transfer_in_with_letter?
           encounter_mappings["HIV First visit"] = ["HIV Staging"]
           encounter_mappings["HIV Staging"] = ["Height/Weight"]
         end
