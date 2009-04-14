@@ -8,13 +8,13 @@ Sham.password   {|n| "rAnDoMsTrInG#{n}" }
 
 Factory.define :concept do |c|
   c.name          "xCough"
-  c.datatype_id   2
+  c.association   :concept_datatype
   c.date_created  { Time.now.to_formatted_s(:db) }
   c.date_changed  { Time.now.to_formatted_s(:db) }
   c.association   :creator, :factory => :user
   c.association   :changed_by, :factory => :user
   c.is_set        false
-  c.association   :class_id, :factory => :concept_class
+  c.association   :concept_class
   c.description   nil
   c.retired       false
 end
@@ -22,8 +22,17 @@ end
 Factory.define :concept_class do |c|
   c.association   :creator, :factory => :user
   c.date_created  { Time.now.to_formatted_s(:db) }
+  c.name          "Anatomy"
+  c.description   "Anatomic sites / descriptors"
 end
 
+Factory.define :concept_datatype do |c|
+  c.association       :creator, :factory => :user
+  c.date_created      { Time.now.to_formatted_s(:db) }
+  c.name              "Boolean"
+  c.hl7_abbreviation  "BIT"
+  c.description       "Boolean value (yes/no, true/false)"
+end
 Factory.define :drug do |d|
   d.date_created  { Time.now.to_formatted_s(:db) }
   d.name          "Stavudine 6"
