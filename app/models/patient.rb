@@ -376,11 +376,14 @@ class Patient < OpenMRS
   end
 
   def continue_treatment_at_current_clinic(date)
-    concept_name="Continue treatment at current clinic"
-    date=date.to_date
-    patient_observations = Observation.find(:all,:conditions => ["concept_id=? and patient_id=? and Date(obs.obs_datetime)=?",(Concept.find_by_name(concept_name).id),patient_id,date],:order=>"obs.obs_datetime desc")
-    return nil if patient_observations.blank?
-    return Concept.find(patient_observations.first.value_coded).name rescue nil
+    continue_treatment = Concept.find_by_name("Continue treatment at current clinic")
+    observation = Observation.find :first,
+      :conditions => ["concept_id = ? and patient_id = ? and Date(obs.obs_datetime) = ?", continue_treatment, self, date.to_date],
+      :order => "obs.obs_datetime DESC"
+
+    return unless observation && observation.value_coded
+    concept = Concept.find(observation.value_coded)
+    concept && concept.name
   end
 
   ## DRUGS
