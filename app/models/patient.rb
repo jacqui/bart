@@ -234,9 +234,10 @@ class Patient < OpenMRS
     end
   end
 
-  def next_forms(date = Date.today, outcome = nil)
-    outcome = self.outcome unless outcome
-    return unless outcome.name =~ /On ART|Defaulter/ rescue false
+  def next_forms(date = Date.today, outcome = self.outcome)
+    if outcome && outcome.name
+      return unless outcome.name =~ /On ART|Defaulter/
+    end
 
     user_activities = User.current_user.activities
     last_encounter = self.last_encounter(date)
@@ -285,25 +286,22 @@ class Patient < OpenMRS
 
     next_forms = next_forms.flatten.compact
 
-
     # Filter out forms that are age dependent and don't match the current patient
     next_forms.delete_if do |form|
       form.uri.match(/adult|child/i) and not form.uri.match(/#{adult_or_child}/i)
     end
+
     # If they are a transfer in with a letter we want the receptionist to copy
     # the staging info using the retrospective staging form
-    next_forms.each do |form|
-      if form.name == "HIV Staging"
-        if transfer_in_with_letter?
-          next_forms.delete(form) unless form.version == "multi_select"
-        else
-          next_forms.delete(form) unless form.version == GlobalProperty.find_by_property("staging_interface").property_value
-        end
+    staging_interface = GlobalProperty.find_by_property("staging_interface").property_value
+    next_forms.reject do |form|
+      next unless form.name == "HIV Staging"
+      if transfer_in_with_letter? && form.version != "multi_select"
+        true
+      elsif form.version != staging_interface
+        true
       end
     end
-
-    return next_forms
-
   end
 
   def current_weight(date = Date.today)
