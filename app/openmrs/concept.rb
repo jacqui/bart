@@ -1,3 +1,4 @@
+require 'app/openmrs/open_mrs'
 class Concept < OpenMRS
   set_table_name "concept"
   set_primary_key "concept_id"
