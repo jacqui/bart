@@ -52,7 +52,7 @@ class Patient < OpenMRS
     def find_by_type_name(type_name)
       encounter_type = EncounterType.find_by_name(type_name)
       raise "Encounter type #{type_name} does not exist" if encounter_type.nil?
-      find(:all, :conditions => ["encounter_type = ?", EncounterType.find_by_name(type_name).id])
+      find(:all, :conditions => ["encounter_type = ?", encounter_type])
     end
 
     def find_by_date(encounter_date)
@@ -391,54 +391,47 @@ class Patient < OpenMRS
     DrugOrder.find(:all,
                    :joins => 'INNER JOIN `orders` ON drug_order.order_id = orders.order_id
     INNER JOIN encounter ON orders.encounter_id = encounter.encounter_id',
-      :conditions => ['encounter.patient_id = ? AND orders.voided = ? ' + extra_conditions,
-        id, 0])
+      :conditions => ["encounter.patient_id = ? AND orders.voided = ? #{extra_conditions}", self, 0])
   end
 
   ## DRUGS
   def drug_orders_by_drug_name(drug_name)
-    #TODO needs optimization
-    encounters.find_by_type_name("Give drugs").collect{|dispensation_encounter|
-      next if dispensation_encounter.voided?
-      dispensation_encounter.orders.collect{|order|
-        order.drug_orders.collect{|drug_order|
-          drug_order if drug_order.drug.name == drug_name
-        }
-      }
-    }.flatten.compact
+    DrugOrder.find(:all, :include => [:drug, {:order => {:encounter => :type}}], :conditions => ["encounter_type.name = ? AND drug.name = ? AND orders.voided = 0", "Give drugs", drug_name])
   end
 
   ## DRUGS
   def drug_orders_for_date(date)
-    date = date.to_date if date.class == Time
-    drug_orders("AND DATE(encounter_datetime) = '#{date}'")
+    drug_orders("AND DATE(encounter_datetime) = '#{date.to_date}'")
   end
 
   ## DRUGS
   # This should only return drug orders for the most recent date
   def previous_art_drug_orders(date = Date.today)
-    previous_art_date = encounters.find(:first,
-                                        :order => 'encounter_datetime DESC',
-                                        :conditions => ['encounter_type = ? AND DATE(encounter_datetime) <= ?',
-                                           EncounterType.find_by_name('Give drugs').id, date]
-                                       ).encounter_datetime.to_date rescue nil
-
-    drug_orders_for_date(previous_art_date) if previous_art_date
+    last_dispensation = encounters.find :first,
+                                        :order => 'encounter.encounter_datetime DESC',
+                                        :include => :type,
+                                        :conditions => ['encounter_type.name = ? AND DATE(encounter.encounter_datetime) <= ?', "Give drugs", date]
+    if last_dispensation
+      previous_art_date = last_dispensation.encounter_datetime.to_date
+      drug_orders_for_date(previous_art_date)
+    end
   end
 
   ## DRUGS
   def cohort_last_art_regimen(start_date=nil, end_date=nil)
-    start_date = Encounter.find(:first, :order => "encounter_datetime").encounter_datetime.to_date if start_date.nil?
-    end_date = Date.today if end_date.nil?
+    first_encounter = Encounter.find(:first, :order => "encounter_datetime")
+    return unless first_encounter
+    start_date ||= first_encounter.encounter_datetime.to_date
+    end_date ||= Date.today
 
     # OPTIMIZE, really, this is ONLY used for cohort and we should be able to use
     # the big set of encounter/regimen names
     dispensation_type_id = EncounterType.find_by_name("Give drugs").id
-    encounters.find(:all, :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?', dispensation_type_id, start_date, end_date], :order => 'encounter_datetime DESC').each do |encounter|
+    dispensations = encounters.find(:all, :conditions => ['encounter_type = ? AND encounter_datetime >= ? AND encounter_datetime <= ?', dispensation_type_id, start_date, end_date], :order => 'encounter_datetime DESC')
+    dispensations.detect do |encounter|
       regimen = encounter.regimen
       return regimen if regimen
     end
-    return nil
   end
 
   # returns short code of the most recent art drugs received
