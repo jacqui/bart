@@ -604,12 +604,11 @@ end
 
       #TODO should this be here?
       session[:is_retrospective] = nil
-      session[:encounter_datetime] = nil
 
       @show_encounter_summary = true if @user_activities.include?("HIV Reception") || @user_activities.include?("HIV Staging") || @user_activities.include?("ART Visit")
       show_find_by_arv_number = GlobalProperty.find_by_property("use_find_by_arv_number")
       @show_find_by_arv_number = true if show_find_by_arv_number.property_value == "true" unless show_find_by_arv_number.blank?
-      @show_user_management = true if @user_is_superuser #.user_roles.collect{|r|r.role.role}.include?("superuser")
+      @show_user_management = true if @user_is_superuser
     else
       @patient = Patient.find(session[:patient_id])
 
@@ -621,22 +620,21 @@ end
        redirect_to :action => "set_datetime_for_retrospective_data_entry" and return
       end
 
-      session[:encounter_datetime]=Time.now if session[:encounter_datetime].nil?
-      session_date = session[:encounter_datetime].to_date
-
       @outcome = @patient.outcome
-      @next_forms = nil
       @show_outcome = true if @outcome and @outcome.name != 'On ART'
-      @next_forms = @patient.next_forms(session_date, @outcome)
+
+      session[:encounter_datetime] = Time.now
+      @next_forms = @patient.next_forms(session[:encounter_datetime].to_date, @outcome)
+      # TODO - Extract these manipulations to a Patient instance method
       unless @next_forms.blank?
-        @next_activities = @next_forms.collect{|f|f.type_of_encounter.name}.uniq
+        @next_activities = @next_forms.collect {|f| f.type_of_encounter.name}.uniq
         # remove any forms that the current users activities don't allow
-        @next_forms.reject!{|frm| !@user_activities.include?(frm.type_of_encounter.name)}
+        @next_forms.reject! {|frm| !@user_activities.include?(frm.type_of_encounter.name)}
         if @next_forms.length == 1 and params["no_auto_load_forms"] != "true"
           if GlobalProperty.find_by_property("disable_update_guardian").blank?
             if @next_forms.first.name =~ /[HIV|TB] Reception/i and @patient.art_guardian.nil?
-              redirect_to :action => "search", :mode => "guardian" and return
               session[:guardian_status] = "none"
+              redirect_to :action => "search", :mode => "guardian" and return
             end
           end
           redirect_to :controller => "form", :action => "show", :id => @next_forms.first.id and return
@@ -698,10 +696,11 @@ end
       @show_next_appointment_date = true
       @next_appointment_date = @patient.next_appointment_date(session[:encounter_datetime]) rescue nil
 
-      @show_print_visit_summary = true if not @patient.drug_orders_for_date(session[:encounter_datetime]).empty?
-      lab_trail = GlobalProperty.find_by_property("show_lab_trail").property_value rescue "false"
-      lab_trail = lab_trail=="false" ? false : true
-      @show_lab_trail = true if (@user_activities.include?("HIV Staging") ||  @user_activities.include?("ART Visit")) and lab_trail
+      @show_print_visit_summary = true if @patient.drug_orders_for_date(session[:encounter_datetime]).any?
+      if @user_activities.include?('HIV Staging') || @user_activities.include?('ART Visit')
+        lab_trail = GlobalProperty.find_by_property('show_lab_trail')
+        @show_lab_trail = true if lab_trail && lab_trail.property_value != 'false'
+      end
     end
 
     @show_change_date = true if session[:encounter_datetime].to_date < Date.today rescue false
