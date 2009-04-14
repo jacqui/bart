@@ -306,51 +306,52 @@ class Patient < OpenMRS
 
   def current_weight(date = Date.today)
     current_weight_observation = observations.find_last_by_concept_name_on_or_before_date("Weight",date)
-    return current_weight_observation.value_numeric unless current_weight_observation.nil?
+    current_weight_observation && current_weight_observation.value_numeric
   end
 
   def current_visit_weight(date = Date.today)
     current_weight_observation = observations.find_last_by_concept_name_on_date("Weight",date)
-    return current_weight_observation.value_numeric unless current_weight_observation.nil?
+    current_weight_observation && current_weight_observation.value_numeric
   end
 
   def previous_weight(date = Date.today)
     previous_weight_observation = observations.find_last_by_concept_name_before_date("Weight",date)
-    return previous_weight_observation.value_numeric unless previous_weight_observation.nil?
+    previous_weight_observation && previous_weight_observation.value_numeric
   end
 
   def percent_weight_changed(start_date, end_date = Date.today)
     start_weight = observations.find_first_by_concept_name_on_or_after_date("Weight", start_date).value_numeric rescue nil
-    end_weight = current_weight(end_date) rescue nil
-    return nil  if end_weight.blank? || start_weight.blank?
-    return (end_weight - start_weight)/start_weight
+    end_weight = current_weight(end_date)
+    return unless start_weight && end_weight
+    (end_weight - start_weight) / start_weight
   end
 
   def current_height(date = Date.today)
     current_height_observation = observations.find_last_by_concept_name_on_or_before_date("Height",date)
-    return current_height_observation.value_numeric unless current_height_observation.nil?
+    current_height_observation && current_height_observation.value_numeric
   end
 
   def previous_height(date = Date.today)
     previous_height_observation = observations.find_last_by_concept_name_before_date("Height",date)
-    return previous_height_observation.value_numeric unless previous_height_observation.nil?
+    previous_height_observation && previous_height_observation.value_numeric
   end
 
   def current_bmi(date = Date.today)
     current_weight = self.current_weight(date)
     current_height = self.current_height(date)
-    return (current_weight/(current_height**2)*10000) unless current_weight.nil? or current_height.nil?
+    return unless current_weight && current_height
+    (current_weight / (current_height**2) * 10000)
   end
 
   def art_therapeutic_feeding_message(date = Date.today)
     bmi = current_bmi(date)
     return if bmi.nil?
     if (bmi > 18.5)
-      return ""
+      ""
     elsif (bmi > 17.0)
-      return "Patient needs counseling due to their low bmi"
+      "Patient needs counseling due to their low bmi"
     else
-      return "Eligibile for therapeutic feeding"
+      "Eligibile for therapeutic feeding"
     end
   end
 
