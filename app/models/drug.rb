@@ -7,7 +7,7 @@ class Drug < OpenMRS
   has_many :barcodes, :class_name => "DrugBarcode",  :foreign_key => :drug_id
 
   belongs_to :concept, :foreign_key => :concept_id
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 
   @@drug_hash_by_name = Hash.new
   @@drug_hash_by_id = Hash.new

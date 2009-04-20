@@ -4,7 +4,7 @@ class ConceptProposal < OpenMRS
 
   belongs_to :ob, :foreign_key => :obs_id
   belongs_to :concept, :foreign_key => :concept_id
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
   belongs_to :encounter, :foreign_key => :encounter_id
 end
 

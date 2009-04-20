@@ -4,7 +4,7 @@ class ConceptSet < OpenMRS
 
   belongs_to :concept, :class_name => "Concept", :foreign_key => :concept_id
   belongs_to :set_concept, :class_name => "Concept", :foreign_key => :concept_set
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 
   validates_uniqueness_of :concept_id, :scope => "concept_set"
 

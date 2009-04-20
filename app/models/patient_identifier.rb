@@ -26,7 +26,7 @@ class PatientIdentifier < OpenMRS
   def self.update(patient_id, identifier, identifier_type, reason)
     current_numbers = PatientIdentifier.find_all_by_patient_id_and_identifier_type(patient_id, identifier_type)
     number_found = false
-    current_numbers.each{|current|
+    current_numbers.each do |current|
       if current.identifier == identifier
         if current.voided?
           current.voided = false
@@ -38,7 +38,7 @@ class PatientIdentifier < OpenMRS
         current.void!(reason)
         current.save!
       end
-    }
+    end
 
     unless number_found
       new_obj = PatientIdentifier.new
@@ -50,7 +50,7 @@ class PatientIdentifier < OpenMRS
   end
 
   def self.find_all_by_identifier_type_name(type_name)
-    PatientIdentifier.find_all_by_identifier_type(PatientIdentifierType.find_by_name(type_name).patient_identifier_type_id)
+    find_all_by_identifier_type(PatientIdentifierType.find_by_name(type_name).patient_identifier_type_id)
   end
 
   def to_s

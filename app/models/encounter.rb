@@ -137,7 +137,7 @@ class Encounter < OpenMRS
 
   def next_encounter_types(programs)
     next_encounter_types = Array.new
-    programs.each{|program|
+    programs.each do |program|
       case program.name
       when "HIV"
         encounter_mappings = {
@@ -166,7 +166,7 @@ class Encounter < OpenMRS
         next_encounter_types << "ART Visit" unless clinician_referral.nil? or clinician_referral.answer_concept.name != "Yes"
       end
       next_encounter_types << encounter_mappings[name]
-    }
+    end
     return next_encounter_types.flatten.compact
   end
 
@@ -178,10 +178,10 @@ class Encounter < OpenMRS
   def self.count_encounters_by_type_for_date(date)
     todays_encounters = Encounter.find(:all, :include => "type", :conditions => ["DATE(encounter_datetime) = ?",date])
     encounters_by_type = Hash.new(0)
-    todays_encounters.each{|encounter|
+    todays_encounters.each do |encounter|
       next if encounter.type.nil?
       encounters_by_type[encounter.type] += 1
-    }
+    end
     return encounters_by_type
   end
 

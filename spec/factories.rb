@@ -11,7 +11,7 @@ Factory.define :concept do |c|
   c.association   :concept_datatype
   c.date_created  { Time.now.to_formatted_s(:db) }
   c.date_changed  { Time.now.to_formatted_s(:db) }
-  c.association   :creator, :factory => :user
+  c.association   :created_by, :factory => :user
   c.association   :changed_by, :factory => :user
   c.is_set        false
   c.association   :concept_class
@@ -19,15 +19,22 @@ Factory.define :concept do |c|
   c.retired       false
 end
 
+Factory.define :concept_answer do |c|
+  c.association   :concept
+  c.association   :answer_option, :factory => :concept
+  c.association   :created_by, :factory => :user
+  c.date_created  { Time.now.to_formatted_s(:db) }
+end
+
 Factory.define :concept_class do |c|
-  c.association   :creator, :factory => :user
+  c.association   :created_by, :factory => :user
   c.date_created  { Time.now.to_formatted_s(:db) }
   c.name          "Anatomy"
   c.description   "Anatomic sites / descriptors"
 end
 
 Factory.define :concept_datatype do |c|
-  c.association       :creator, :factory => :user
+  c.association   :created_by, :factory => :user
   c.date_created      { Time.now.to_formatted_s(:db) }
   c.name              "Boolean"
   c.hl7_abbreviation  "BIT"
@@ -39,7 +46,7 @@ Factory.define :drug do |d|
   d.route         "PO"
   d.units         "mg"
   d.combination   true
-  d.association   :creator, :factory => :user
+  d.association   :created_by, :factory => :user
   d.association   :concept
 end
 
@@ -52,10 +59,10 @@ Factory.define :encounter do |e|
   e.date_created        { Time.now.to_formatted_s(:db) }
   e.encounter_datetime  { 1.week.ago.to_formatted_s(:db) }
   e.association         :type, :factory => :encounter_type
-  e.association         :form, :factory => :form
+  e.association         :form
   e.association         :location
-  e.association         :patient_id, :factory => :user
-  e.association         :provider_id, :factory => :user
+  e.association         :patient
+  e.association         :provider, :factory => :user
   e.association         :created_by, :factory => :user
 end
 
@@ -68,7 +75,7 @@ Factory.define :form do |f|
   f.build         1
   f.published     1
   f.association   :encounter_type
-  f.association   :creator, :factory => :user
+  f.association   :created_by, :factory => :user
   f.date_created  { Time.now.to_formatted_s(:db) }
   f.date_changed  { Time.now.to_formatted_s(:db) }
   f.date_retired  { Time.now.to_formatted_s(:db) }
@@ -80,7 +87,7 @@ end
 Factory.define :location do |l|
   l.name          "Chinthembwe Health Centre"
   l.date_created  { Time.now.to_formatted_s(:db) }
-  l.association   :creator, :factory => :user
+  l.association   :created_by, :factory => :user
   l.description   "Private Health Facility"
 end
 
@@ -91,7 +98,7 @@ Factory.define :observation do |o|
   o.association   :order
   o.patient       {|x| x.encounter.patient}
   o.date_created  { Time.now.to_formatted_s(:db) }
-  o.association   :creator, :factory => :user
+  o.association   :created_by, :factory => :user
   o.voided        false
   o.obs_datetime  "2007-03-05 17:37:33"
   o.value_numeric 66
@@ -99,7 +106,7 @@ end
 
 Factory.define :order do |o|
   o.date_created  { Time.now.to_formatted_s(:db) }
-  o.association   :creator, :factory => :user
+  o.association   :created_by, :factory => :user
   o.association   :encounter
   o.association   :order_type
   o.voided        false
@@ -107,7 +114,7 @@ end
 
 Factory.define :order_type do |ot|
   ot.date_created  { Time.now.to_formatted_s(:db) }
-  ot.association   :creator, :factory => :user
+  ot.association   :created_by, :factory => :user
   ot.name          "Give drugs"
 end
 

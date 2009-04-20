@@ -7,6 +7,6 @@ class Form < OpenMRS
   has_many :encounters, :foreign_key => :form_id
 
   belongs_to :type_of_encounter, :class_name => "EncounterType",  :foreign_key => :encounter_type
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 end
 

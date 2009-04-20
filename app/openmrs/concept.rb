@@ -30,7 +30,7 @@ class Concept < OpenMRS
 
   belongs_to :concept_class, :foreign_key => :class_id
   belongs_to :concept_datatype, :foreign_key => :datatype_id
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 
   def to_s
     name

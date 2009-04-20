@@ -9,9 +9,9 @@ class Location < OpenMRS
   has_many :patient_identifiers, :foreign_key => :location_id
 
   belongs_to :parent, :foreign_key => :parent_location_id, :class_name => "Location"
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :foreign_key => :creator, :class_name => "User"
 
-  cattr_accessor :current_location
+  cattr_writer :current_location
 
   def to_fixture_name
     return super if name.blank? || name.match(/^\d/)
@@ -23,7 +23,11 @@ class Location < OpenMRS
   end
 
   def self.current_location
-    @@current_location ||= Location.find(GlobalProperty.find_by_property("current_health_center_id").property_value) rescue nil
+    return @@current_location if @@current_location
+    current_health_center = GlobalProperty.find_by_property("current_health_center_id")
+    if current_health_center
+      @@current_location = Location.find_by_location_id(current_health_center.property_value)
+    end
   end
 
   def self.find_like_name(concept_name)

@@ -41,6 +41,7 @@ Rails::Initializer.run do |config|
              :lib    => "factory_girl",
              :source => "http://gems.github.com"
 
+  config.load_paths = ["#{RAILS_ROOT}/app/openmrs"].concat(config.load_paths)
 end
 
 # Include your application configuration below

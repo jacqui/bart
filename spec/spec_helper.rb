@@ -75,11 +75,10 @@ end
 Spec::Runner.configure do |config|
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures  = false
-  config.global_fixtures = :all
 
   config.before do
-    User.current_user ||= users(:mikmck)
-    Location.current_location = location(:martin_preuss_centre)
+    User.current_user = Factory(:user)
+    Location.current_location = Factory(:location)
   end
 
 end

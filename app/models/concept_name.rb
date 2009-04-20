@@ -4,7 +4,7 @@ class ConceptName < OpenMRS
   set_primary_keys :concept_id, :locale
 
   belongs_to :concept, :foreign_key => :concept_id
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 end
 
 

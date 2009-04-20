@@ -3,7 +3,7 @@ class ConceptMap < OpenMRS
   set_primary_key "concept_map_id"
 
   belongs_to :concept_source, :foreign_key => :concept_source_id
-  belongs_to :user, :foreign_key => :user_id
+  belongs_to :created_by, :class_name => "User", :foreign_key => :creator
 end
 
 ### Original SQL Definition for concept_map ####
