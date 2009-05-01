@@ -1,91 +1,195 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-class FakeClass < OpenMRS
-
-end
-
 describe OpenMRS do
-  it "inherits from ActiveRecord::Base" do
-    OpenMRS.superclass.should == ActiveRecord::Base
+  before do
+    @concept = Concept.new
+    User.stubs(:current_user)
+    @user = User.new
   end
 
-  describe "#before_save" do
-    it "calls super"
-    describe "changed_by attribute" do
-      it "checks that the attribute exists"
-      it "checks that there is a current_user"
-      it "when existent, gets set to current_user"
-      it "when no current user, does not get set"
-      it "when not existent, does not get set"
+  context "changed_by" do
+    context "when subclass has attribute" do
+      context "with current_user" do
+        before do
+          User.stubs(:current_user).returns(stub_model(User, Factory.attributes_for(:user)))
+        end
+        it "sets to current_user's user_id" do
+          lambda { @concept.save }.should change(@concept, :changed_by).to(User.current_user.user_id)
+        end
+      end
+      context "without a current_user" do
+        before do
+          User.stubs(:current_user)
+        end
+        it "does not set the attribute" do
+          lambda { @concept.save }.should_not change(@concept, :changed_by)
+        end
+      end
     end
-    describe "date_changed attribute" do
-      it "checks that the attribute exists"
-      it "when existent, gets set to Time.now"
-      it "when not existent, does not get set"
-    end
-  end
-  describe "#before_create" do
-    it "calls super"
-    describe "date_created attribute" do
-      it "checks that the attribute exists"
-      it "when existent, gets set to Time.now"
-      it "when not existent, does not get set"
-    end
-    describe "creator attribute" do
-      it "checks that the attribute exists"
-      it "checks for the existence of current_user"
-      it "when existent, gets set to current_user"
-      it "when not existent, does not get set"
-    end
-    describe "location_id attribute" do
-      it "checks that the attribute exists"
-      it "checks for the existence of current_location"
-      it "when existent, gets set to current_location"
-      it "when not existent, does not get set"
-      it "when location_id == 0, does not get set"
+    context "date_changed" do
+      context "when attribute exists" do
+        it "gets set to Time.now" do
+          lambda{ @concept.save }.should change(@concept, :date_changed)
+        end
+      end
     end
   end
-  describe "#void!" do
-    it "requires a reason"
-    it "calls void()"
-    it "calls save!"
-  end
-  describe "#void" do
-    it "requires a reason"
-    it "returns nil if voided?"
-    it "sets date_voided to Time.now"
-    it "sets voided to true"
-    it "sets void_reason to reason"
-    it "checks there is a current_user"
-    it "sets voided_by to current_user's user_id when current_user is defined"
-    it "does not set voided_by when no current_user"
-  end
-  describe "#voided?" do
-    it "checks the voided attribute exists"
-    it "returns voided when attribute exists"
-    it "raises an error when attribute does not exist"
-  end
-  describe "#composite_clone" do
-    it "calls composite?"
-    describe "when object is composite" do
-      it "grabs attributes before they are typecast"
-      it "sets an @attributes ivar"
+
+  context "#before_create" do
+    context "date_created" do
+      context "when attribute exists" do
+        it "gets set to Time.now" do
+          lambda{ @concept.save }.should change(@concept, :date_created)
+        end
+      end
     end
-    describe "when not composite" do
-      it "calls clone"
+    context "creator" do
+      context "with current_user" do
+        before do
+          User.stubs(:current_user).returns(stub_model(User, Factory.attributes_for(:user)))
+        end
+        it "sets to current_user's user_id" do
+          lambda { @concept.save }.should change(@concept, :creator).to(User.current_user.user_id)
+        end
+      end
+      context "without a current_user" do
+        before do
+          User.stubs(:current_user)
+        end
+        it "does not set the attribute" do
+          lambda { @concept.save }.should_not change(@concept, :creator)
+        end
+      end
+    end
+    context "location_id attribute" do
+      before do
+        @concept.stubs(:location_id)
+        @concept.stubs(:location_id=)
+      end
+      context "with current_location" do
+        before do
+          Location.stubs(:current_location).returns(stub_model(Location, Factory.attributes_for(:location)))
+        end
+        it "sets to current_location's location_id" do
+          @concept.expects(:location_id=)
+          @concept.save
+        end
+      end
+      context "without a current_location" do
+        before do
+          Location.stubs(:current_location)
+        end
+        it "does not set the attribute" do
+          @concept.expects(:location_id).never
+          @concept.save
+        end
+      end
     end
   end
-  describe ".find_like_name" do
-    it "requires a name parameter"
-    it "calls find with conditions on name"
+  context "#void!" do
+    before do
+      @user.stubs(:void)
+      @user.stubs(:save!)
+    end
+    it "requires a reason" do
+      lambda{ @user.void! }.should raise_error
+    end
+    it "calls void" do
+      @user.expects(:void).with('foo')
+      @user.void!('foo')
+    end
+    it "calls save!" do
+      @user.expects(:save!)
+      @user.void!('foo')
+    end
   end
-  describe ".cache_on" do
-    it "takes a splat args"
-    it "sets class attr_accessor named 'cached'"
-    it "sets class attribute 'cached' to true"
+  context "#void" do
+    before do
+      @user.stubs(:voided?).returns(false)
+    end
+    it "requires a reason" do
+      lambda{ @user.void }.should raise_error
+    end
+    it "returns nil if voided?" do
+      @user.stubs(:voided?).returns(true)
+      @user.void('foo').should be_nil
+    end
+    it "sets date_voided to Time.now" do
+      lambda { @user.void('foo') }.should change(@user, :date_voided)
+    end
+    it "sets voided to true" do
+      lambda { @user.void('foo') }.should change(@user, :voided).to(true)
+    end
+    it "sets void_reason to reason" do
+      lambda { @user.void('foo') }.should change(@user, :void_reason).to('foo')
+    end
+    it "sets voided_by to current_user's user_id when current_user is defined" do
+      voider = Factory(:user)
+      User.stubs(:current_user).returns(voider)
+      lambda { @user.void('foo') }.should change(@user, :voided_by).to(voider.user_id)
+    end
+    it "does not set voided_by when no current_user" do
+      User.stubs(:current_user)
+      lambda { @user.void('foo') }.should_not change(@user, :voided_by)
+    end
   end
-  describe ".cached?" do
-    it "returns the value of cached attribute"
+  context "#voided?" do
+    it "returns the boolean value when the attribute exists" do
+      @user.stubs(:voided).returns(true)
+      @user.should be_voided
+    end
+    it "raises an error when attribute does not exist" do
+      lambda do
+        @concept.voided?
+      end.should raise_error
+    end
   end
+
+  context "#composite_clone" do
+    context "on a non-composite record" do
+      before do
+        @user.stubs(:composite?).returns(false)
+      end
+
+      it "calls clone" do
+        clone = @user.clone
+        @user.expects(:clone).returns(clone)
+        @user.composite_clone
+      end
+    end
+
+    context "on a composite record" do
+      before do
+        @user.stubs(:composite?).returns(true)
+      end
+
+      it "makes a new record of the same type" do
+        blank = User.new
+        User.expects(:new).yields(blank)
+        @user.composite_clone
+      end
+
+      it "fetches the uncast attributes and sets them on the clone" do
+        blank = User.new
+        User.expects(:new).yields(blank)
+        @user.expects(:attributes_before_type_cast).returns({})
+        blank.expects(:instance_variable_set).with('@attributes', {})
+        @user.composite_clone
+      end
+    end
+  end
+
+#  context ".find_like_name" do
+#    it "requires a name parameter"
+#    it "calls find with conditions on name"
+#  end
+#  context ".cache_on" do
+#    it "takes a splat args"
+#    it "sets class attr_accessor named 'cached'"
+#    it "sets class attribute 'cached' to true"
+#  end
+#  context ".cached?" do
+#    it "returns the value of cached attribute"
+#  end
 
 end

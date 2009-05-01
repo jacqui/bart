@@ -75,10 +75,11 @@ end
 Spec::Runner.configure do |config|
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures  = false
+  config.mock_with :mocha
 
   config.before do
-    User.current_user = Factory(:user)
-    Location.current_location = Factory(:location)
+#    User.stubs(:current_user).returns(stub(User, :user_id => 1))
+#    Location.stubs(:current_location).returns(stub(Location, :location_id => 1))
   end
 
 end

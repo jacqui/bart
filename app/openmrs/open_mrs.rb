@@ -1,6 +1,9 @@
 class OpenMRS < ActiveRecord::Base
+  self.abstract_class = true
+
   def before_save
     super
+    # TODO: add warning or raise exception when there's no User.current_user
     if self.attributes.has_key?("changed_by") && User.current_user
       self.changed_by = User.current_user.user_id
     end
