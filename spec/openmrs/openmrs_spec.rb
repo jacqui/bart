@@ -5,6 +5,7 @@ describe OpenMRS do
     @concept = Concept.new
     User.stubs(:current_user)
     @user = User.new
+    @observation = Factory.build(:observation, :location_id => 0)
   end
 
   context "changed_by" do
@@ -62,17 +63,13 @@ describe OpenMRS do
       end
     end
     context "location_id attribute" do
-      before do
-        @concept.stubs(:location_id)
-        @concept.stubs(:location_id=)
-      end
       context "with current_location" do
         before do
           Location.stubs(:current_location).returns(stub_model(Location, Factory.attributes_for(:location)))
         end
         it "sets to current_location's location_id" do
-          @concept.expects(:location_id=)
-          @concept.save
+          @observation.expects(:location_id=)
+          @observation.save
         end
       end
       context "without a current_location" do
@@ -80,8 +77,8 @@ describe OpenMRS do
           Location.stubs(:current_location)
         end
         it "does not set the attribute" do
-          @concept.expects(:location_id).never
-          @concept.save
+          @observation.expects(:location_id=).never
+          @observation.save
         end
       end
     end
@@ -179,17 +176,27 @@ describe OpenMRS do
     end
   end
 
-#  context ".find_like_name" do
-#    it "requires a name parameter"
-#    it "calls find with conditions on name"
-#  end
-#  context ".cache_on" do
-#    it "takes a splat args"
-#    it "sets class attr_accessor named 'cached'"
-#    it "sets class attribute 'cached' to true"
-#  end
-#  context ".cached?" do
-#    it "returns the value of cached attribute"
-#  end
-
+  context ".find_like_name" do
+    it "requires a name parameter" do
+      lambda { Concept.find_like_name }.should raise_error
+    end
+    it "calls find with conditions on name" do
+      Concept.expects(:find).with(:all, :conditions => ["name LIKE ?", "%foo%"])
+      Concept.find_like_name("foo")
+    end
+  end
+  context ".cache_on" do
+    it "sets class attr_accessor named 'cached' to true" do
+      Concept.cache_on
+      Concept.cached.should be_true
+    end
+  end
+  context ".cached?" do
+    before do
+      Concept.cache_on
+    end
+    it "returns the value of cached attribute" do
+      Concept.should be_cached
+    end
+  end
 end

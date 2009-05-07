@@ -92,13 +92,8 @@ Factory.define :location do |l|
 end
 
 Factory.define :observation do |o|
-  o.association   :concept
-  o.association   :encounter
   o.association   :location
-  o.association   :order
-  o.patient       {|x| x.encounter.patient}
   o.date_created  { Time.now.to_formatted_s(:db) }
-  o.association   :created_by, :factory => :user
   o.voided        false
   o.obs_datetime  "2007-03-05 17:37:33"
   o.value_numeric 66
